@@ -1,17 +1,28 @@
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.JToggleButton;
+import javax.swing.SpinnerListModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.Timer;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -20,46 +31,9 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.DialShape;
 import org.jfree.chart.plot.MeterInterval;
 import org.jfree.chart.plot.MeterPlot;
-import org.jfree.chart.plot.dial.DialBackground;
-import org.jfree.chart.plot.dial.DialCap;
-import org.jfree.chart.plot.dial.DialPlot;
-import org.jfree.chart.plot.dial.DialTextAnnotation;
-import org.jfree.chart.plot.dial.DialValueIndicator;
-import org.jfree.chart.plot.dial.StandardDialFrame;
-import org.jfree.chart.plot.dial.StandardDialScale;
 import org.jfree.data.Range;
 import org.jfree.data.general.DefaultValueDataset;
 import org.jfree.data.general.ValueDataset;
-
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JToggleButton;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.Timer;
-import javax.swing.JButton;
-import javax.swing.SpinnerListModel;
-import javax.swing.JTextField;
-import javax.swing.JCheckBox;
-import java.awt.Panel;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Color;
-import java.awt.Dimension;
-
-import javax.swing.border.TitledBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.border.EtchedBorder;
-import java.awt.Window.Type;
-import javax.swing.SpringLayout;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
-import com.jgoodies.forms.layout.FormSpecs;
-
-import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 
 public class GUI {
 
@@ -116,7 +90,7 @@ public class GUI {
 		frmGfozIc.setBounds(0, 0, 600, 800);
 		frmGfozIc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmGfozIc.getContentPane().setLayout(null);
-		
+
 		JPanel panel_1 = new JPanel();
 		panel_1.setBounds(0, 0, 400, 200);
 		frmGfozIc.getContentPane().add(panel_1);
@@ -167,8 +141,9 @@ public class GUI {
 				if (!Temp.getValueIsAdjusting()) {
 					int value = Temp.getValue();
 					if (qmx != null) {
-						if (debug)
+						if (debug) {
 							System.out.println("CatResp: " + qmx.sendCatStringmain("KS" + value));
+						}
 						spinner.setValue(value);
 					}
 					System.out.println("WPM" + value);
@@ -186,10 +161,11 @@ public class GUI {
 
 		JSpinner spinnerMode = new JSpinner();
 		spinnerMode.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
-				qmx.sendCatStringmain("MD"  + qmx.setModeInt(  (String) spinnerMode.getValue()   ));
+				qmx.sendCatStringmain("MD"  + mc2.setModeInt(  (String) spinnerMode.getValue()   ));
 	    }
-				
+
 		});
 		spinnerMode.setModel(new SpinnerListModel(new String[] { "LSB", "USB", "CW", "FSK", "CWR", "FSR" }));
 		GridBagConstraints gbc_spinnerMode = new GridBagConstraints();
@@ -222,12 +198,13 @@ public class GUI {
 		gbc_lblLcd.gridx = 1;
 		gbc_lblLcd.gridy = 2;
 		panel.add(lblLcd, gbc_lblLcd);
-		
+
 		// null
 		//mc2.toString();
 
 		JButton btnSendCq = new JButton("send CQ");
 		btnSendCq.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				qmx.sendCatStringmain("");
 				System.out.println("Send M1");
@@ -260,6 +237,7 @@ public class GUI {
 
 		JToggleButton tglbtnPtt = new JToggleButton("PTT");
 		tglbtnPtt.addItemListener(new ItemListener() {
+			@Override
 			public void itemStateChanged(ItemEvent ev) {
 				if (ev.getStateChange() == ItemEvent.SELECTED) {
 					System.out.println("PTT on" + qmx.sendCatStringmain("TQ1"));
@@ -391,7 +369,7 @@ public class GUI {
 		gbc_chckbxTx.gridx = 2;
 		gbc_chckbxTx.gridy = 7;
 		panel.add(chckbxTx, gbc_chckbxTx);
-		
+
 		JPanel statusPanel = new JPanel();
 		statusPanel.setBorder(new TitledBorder(new LineBorder(new Color(184, 207, 229)), "Info", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(51, 51, 51)));
 		GridBagConstraints gbc_statusPanel = new GridBagConstraints();
@@ -406,16 +384,17 @@ public class GUI {
 		gbl_statusPanel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
 		gbl_statusPanel.rowWeights = new double[]{0.0, Double.MIN_VALUE};
 		statusPanel.setLayout(gbl_statusPanel);
-		
+
 		JLabel statusLabel = new JLabel("Status");
 		GridBagConstraints gbc_statusLabel = new GridBagConstraints();
 		gbc_statusLabel.anchor = GridBagConstraints.NORTHWEST;
 		gbc_statusLabel.gridx = 0;
 		gbc_statusLabel.gridy = 0;
 		statusPanel.add(statusLabel, gbc_statusLabel);
-		if (debug)
+		if (debug) {
 			System.out.println("Timer Fired, pwer:" + pwr);
-		
+		}
+
 		DefaultValueDataset dataset = new DefaultValueDataset(10D);
 		JFreeChart sdial = createChart(dataset);
 		panel_1.setLayout(null);
@@ -441,38 +420,39 @@ public class GUI {
 		// set up the timer
 		//
 		Timer timer = new Timer(100, new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent evt) {
 				statusLabel.setText(qmx.sendCatStringmain("IF") );
 				// TX state
-				isTx = (qmx.getIntFromString(qmx.sendCatStringmain("TQ"))) > 0 ? true : false;
+				isTx = (mc2.getIntFromString(qmx.sendCatStringmain("TQ"))) > 0 ? true : false;
 				chckbxTx.setSelected(isTx);
 				// currentn mode
-				thisMode = qmx.getIntFromString(qmx.sendCatStringmain("MD"));
-				spinnerMode.setValue( qmx.getModeString(thisMode));
+				thisMode = mc2.getIntFromString(qmx.sendCatStringmain("MD"));
+				spinnerMode.setValue( mc2.getModeString(thisMode));
 				// current WPM
-				thisWpm = qmx.getIntFromString(qmx.sendCatStringmain("KS"));
+				thisWpm = mc2.getIntFromString(qmx.sendCatStringmain("KS"));
 				wpm.setValue(thisWpm);
 				// signal strenght
-				sig = qmx.getIntFromString(qmx.sendCatStringmain("SM"));
+				sig = mc2.getIntFromString(qmx.sendCatStringmain("SM"));
 				MeterPlot plot = (MeterPlot) sdial.getPlot();
 				dataset.setValue(sig);
 				plot.setDataset(dataset);
 				power.setValue(sig);
 				lcdText.setText(qmx.sendCatStringmain("LC").replaceAll("(LC|;)", ""));
-				agc = qmx.getIntFromString(qmx.sendCatStringmain("SA"));
-				pc = qmx.getIntFromString(qmx.sendCatStringmain("PC"));
-				sw = qmx.getIntFromString(qmx.sendCatStringmain("SW"));
+				agc = mc2.getIntFromString(qmx.sendCatStringmain("SA"));
+				pc = mc2.getIntFromString(qmx.sendCatStringmain("PC"));
+				sw = mc2.getIntFromString(qmx.sendCatStringmain("SW"));
 				// display the VFO contents
-				txtVfoa.setText(Integer.toString(qmx.getIntFromString(qmx.sendCatStringmain("FA"))));
-				txtVfob.setText(Integer.toString(qmx.getIntFromString(qmx.sendCatStringmain("FB"))));
+				txtVfoa.setText(Integer.toString(mc2.getIntFromString(qmx.sendCatStringmain("FA"))));
+				txtVfob.setText(Integer.toString(mc2.getIntFromString(qmx.sendCatStringmain("FB"))));
 				//qmx.sendCatStringmain("FB");
-				
-		
+
+
 
 				if (oldVal1 != (pc + sw)) {
 					System.out.println("CatResp RX Sig: " + sig + "dB" + " agc/pc/sw " + agc + "/" + pc + "/" + sw);
-					pwrt.setText(Float.toString((float) ((float) pc / 10.0)));
-					swrt.setText(Float.toString((float) ((float) sw / 100.0)));
+					pwrt.setText(Float.toString((float) (pc / 10.0)));
+					swrt.setText(Float.toString((float) (sw / 100.0)));
 					oldVal1 = (pc + sw);
 				}
 
@@ -481,7 +461,7 @@ public class GUI {
 		timer.setRepeats(true);
 		timer.start();
 	}
-	
+
     private static JFreeChart createChart(ValueDataset dataset) {
     	MeterPlot plot = new MeterPlot(dataset);
          plot.addInterval(new MeterInterval("All", new Range(0.0, 100.0)));
@@ -489,22 +469,22 @@ public class GUI {
         plot.setDialOutlinePaint(Color.white);
       //  plot.addInterval(new MeterInterval("Low", new Range(0.00, 70.0), Color.RED, new BasicStroke(2.0f), null));
 
-        
- 
-        
+
+
+
         plot.setUnits("dB");
         plot.setTickLabelsVisible(true);
         plot.setDialShape(DialShape.CHORD);
         plot.setValuePaint(Color.GRAY);
-        
+
         //plot.getIntervals().a
         plot.setTickLabelsVisible(true);
         plot.setRange(new Range(0, 100));
         plot.setMeterAngle(180);
-        plot.setTickLabelPaint(Color.ORANGE);     
+        plot.setTickLabelPaint(Color.ORANGE);
         JFreeChart chart = new JFreeChart("S-meter", JFreeChart.DEFAULT_TITLE_FONT, plot, false);
         return chart;
 
-   
+
 	   }
    }
