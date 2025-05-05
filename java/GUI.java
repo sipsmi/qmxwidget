@@ -14,6 +14,23 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.DialShape;
+import org.jfree.chart.plot.MeterInterval;
+import org.jfree.chart.plot.MeterPlot;
+import org.jfree.chart.plot.dial.DialBackground;
+import org.jfree.chart.plot.dial.DialCap;
+import org.jfree.chart.plot.dial.DialPlot;
+import org.jfree.chart.plot.dial.DialTextAnnotation;
+import org.jfree.chart.plot.dial.DialValueIndicator;
+import org.jfree.chart.plot.dial.StandardDialFrame;
+import org.jfree.chart.plot.dial.StandardDialScale;
+import org.jfree.data.Range;
+import org.jfree.data.general.DefaultValueDataset;
+import org.jfree.data.general.ValueDataset;
+
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -27,10 +44,22 @@ import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 import java.awt.Panel;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Color;
+import java.awt.Dimension;
+
 import javax.swing.border.TitledBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.EtchedBorder;
+import java.awt.Window.Type;
+import javax.swing.SpringLayout;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.RowSpec;
+import com.jgoodies.forms.layout.FormSpecs;
+
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 
 public class GUI {
 
@@ -84,17 +113,21 @@ public class GUI {
 	private void initialize() {
 		frmGfozIc = new JFrame();
 		frmGfozIc.setTitle("G0FOZ - QMX Controller");
-		frmGfozIc.setBounds(100, 100, 450, 300);
+		frmGfozIc.setBounds(0, 0, 600, 800);
 		frmGfozIc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmGfozIc.getContentPane().setLayout(new GridLayout(1, 0, 0, 0));
-
+		frmGfozIc.getContentPane().setLayout(null);
+		
+		JPanel panel_1 = new JPanel();
+		panel_1.setBounds(0, 0, 400, 200);
+		frmGfozIc.getContentPane().add(panel_1);
 		JPanel panel = new JPanel();
+		panel.setBounds(0, 200, 400, 400);
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		frmGfozIc.getContentPane().add(panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		JSpinner spinner = new JSpinner();
-		gbl_panel.columnWidths = new int[] { 0, 0, 0, 0 };
-		gbl_panel.rowHeights = new int[] { 55, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_panel.columnWidths = new int[] {0, 0, 0, 20, 20};
+		gbl_panel.rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_panel.columnWeights = new double[] { 1.0, 0.0, 0.0, Double.MIN_VALUE };
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		panel.setLayout(gbl_panel);
@@ -173,6 +206,7 @@ public class GUI {
 		panel.add(tglbtnNewToggleButton, gbc_tglbtnNewToggleButton);
 
 		lcdText = new JTextField();
+		lcdText.setEditable(false);
 		GridBagConstraints gbc_lcdText = new GridBagConstraints();
 		gbc_lcdText.insets = new Insets(0, 0, 5, 5);
 		gbc_lcdText.fill = GridBagConstraints.HORIZONTAL;
@@ -188,6 +222,9 @@ public class GUI {
 		gbc_lblLcd.gridx = 1;
 		gbc_lblLcd.gridy = 2;
 		panel.add(lblLcd, gbc_lblLcd);
+		
+		// null
+		//mc2.toString();
 
 		JButton btnSendCq = new JButton("send CQ");
 		btnSendCq.addActionListener(new ActionListener() {
@@ -198,9 +235,10 @@ public class GUI {
 		});
 
 		txtVfoa = new JTextField();
+		txtVfoa.setEditable(false);
 		txtVfoa.setText("0");
 		GridBagConstraints gbc_txtVfoa = new GridBagConstraints();
-		gbc_txtVfoa.anchor = GridBagConstraints.EAST;
+		gbc_txtVfoa.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txtVfoa.insets = new Insets(0, 0, 5, 5);
 		gbc_txtVfoa.gridx = 0;
 		gbc_txtVfoa.gridy = 3;
@@ -234,7 +272,7 @@ public class GUI {
 		txtVfob = new JTextField();
 		txtVfob.setText("0");
 		GridBagConstraints gbc_txtVfob = new GridBagConstraints();
-		gbc_txtVfob.anchor = GridBagConstraints.EAST;
+		gbc_txtVfob.fill = GridBagConstraints.HORIZONTAL;
 		gbc_txtVfob.insets = new Insets(0, 0, 5, 5);
 		gbc_txtVfob.gridx = 0;
 		gbc_txtVfob.gridy = 4;
@@ -304,7 +342,7 @@ public class GUI {
 
 		pwrt = new JTextField();
 		GridBagConstraints gbc_pwrt = new GridBagConstraints();
-		gbc_pwrt.anchor = GridBagConstraints.EAST;
+		gbc_pwrt.fill = GridBagConstraints.HORIZONTAL;
 		gbc_pwrt.insets = new Insets(0, 0, 5, 5);
 		gbc_pwrt.gridx = 0;
 		gbc_pwrt.gridy = 6;
@@ -321,7 +359,7 @@ public class GUI {
 
 		swrt = new JTextField();
 		GridBagConstraints gbc_swrt = new GridBagConstraints();
-		gbc_swrt.anchor = GridBagConstraints.EAST;
+		gbc_swrt.fill = GridBagConstraints.HORIZONTAL;
 		gbc_swrt.insets = new Insets(0, 0, 5, 5);
 		gbc_swrt.gridx = 0;
 		gbc_swrt.gridy = 7;
@@ -377,6 +415,28 @@ public class GUI {
 		statusPanel.add(statusLabel, gbc_statusLabel);
 		if (debug)
 			System.out.println("Timer Fired, pwer:" + pwr);
+		
+		DefaultValueDataset dataset = new DefaultValueDataset(10D);
+		JFreeChart sdial = createChart(dataset);
+		panel_1.setLayout(null);
+		ChartPanel chartpanel = new ChartPanel(sdial);
+		chartpanel.setBounds(0, 0, 400, 200);
+		chartpanel.setDomainZoomable(true);
+		chartpanel.setBorder(null);
+		chartpanel.setMaximumDrawWidth(400);
+		chartpanel.setMaximumDrawHeight(200);
+		chartpanel.setLayout(null);
+		//chartpanel.setLocation(0, 400);
+		//chartpanel.setVisible(true);
+		//chartpanel.setDomainZoomable(true);
+		//frmGfozIc.getContentPane().add(chartpanel);
+		GridBagConstraints gbc_dial = new GridBagConstraints();
+		gbc_dial.fill = GridBagConstraints.BOTH;
+		gbc_dial.insets = new Insets(0,0,0,0);
+		gbc_dial.gridx = 0;
+		gbc_dial.gridy = 0;
+		panel_1.add(chartpanel);
+
 
 		// set up the timer
 		//
@@ -394,6 +454,9 @@ public class GUI {
 				wpm.setValue(thisWpm);
 				// signal strenght
 				sig = qmx.getIntFromString(qmx.sendCatStringmain("SM"));
+				MeterPlot plot = (MeterPlot) sdial.getPlot();
+				dataset.setValue(sig);
+				plot.setDataset(dataset);
 				power.setValue(sig);
 				lcdText.setText(qmx.sendCatStringmain("LC").replaceAll("(LC|;)", ""));
 				agc = qmx.getIntFromString(qmx.sendCatStringmain("SA"));
@@ -402,7 +465,9 @@ public class GUI {
 				// display the VFO contents
 				txtVfoa.setText(Integer.toString(qmx.getIntFromString(qmx.sendCatStringmain("FA"))));
 				txtVfob.setText(Integer.toString(qmx.getIntFromString(qmx.sendCatStringmain("FB"))));
-				qmx.sendCatStringmain("FB");
+				//qmx.sendCatStringmain("FB");
+				
+		
 
 				if (oldVal1 != (pc + sw)) {
 					System.out.println("CatResp RX Sig: " + sig + "dB" + " agc/pc/sw " + agc + "/" + pc + "/" + sw);
@@ -416,5 +481,30 @@ public class GUI {
 		timer.setRepeats(true);
 		timer.start();
 	}
+	
+    private static JFreeChart createChart(ValueDataset dataset) {
+    	MeterPlot plot = new MeterPlot(dataset);
+         plot.addInterval(new MeterInterval("All", new Range(0.0, 100.0)));
+          plot.addInterval(new MeterInterval("High", new Range(80.0, 100.0)));
+        plot.setDialOutlinePaint(Color.white);
+      //  plot.addInterval(new MeterInterval("Low", new Range(0.00, 70.0), Color.RED, new BasicStroke(2.0f), null));
 
-}
+        
+ 
+        
+        plot.setUnits("dB");
+        plot.setTickLabelsVisible(true);
+        plot.setDialShape(DialShape.CHORD);
+        plot.setValuePaint(Color.GRAY);
+        
+        //plot.getIntervals().a
+        plot.setTickLabelsVisible(true);
+        plot.setRange(new Range(0, 100));
+        plot.setMeterAngle(180);
+        plot.setTickLabelPaint(Color.ORANGE);     
+        JFreeChart chart = new JFreeChart("S-meter", JFreeChart.DEFAULT_TITLE_FONT, plot, false);
+        return chart;
+
+   
+	   }
+   }
