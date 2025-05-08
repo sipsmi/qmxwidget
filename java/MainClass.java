@@ -1,7 +1,24 @@
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainClass {
 
-	private static boolean debug = false;
+	private static boolean debug = true;
+	private static String myCall = "GX0XXX";
+
+	public MainClass() {
+		try {
+
+		} catch (Exception e) {
+			System.err.println("Main Class Configuraiton Error: " + e.getMessage());
+			//e.printStackTrace();
+			//System.exit(1);
+		}
+	}
 
 	/**
 	 *
@@ -11,7 +28,32 @@ public class MainClass {
 		try {
 			// initiate the base classes
 			XmlRpcQmx qmx = new XmlRpcQmx();
+			// get parameters
+			JSONObject jsonObj = null;
+			// Get the paramgers
+			// get the command line arguments
+			// check files exist and ebough args
+			int argc = args.length;
+			if (argc != 1) { // no parameter given
+				System.out.println("Useage(" + argc + "): <command> <configuration file.json>");
+				System.exit(1);
+			} else if (Files.exists(Paths.get(args[0]))) { // get from file
+				try {
+					jsonObj = getParamAsJSON(args[0]); // get params into JSON
+					// TODO Auto-generated constructor stub
+					dispDebug(jsonObj.toString());
+					myCall = jsonObj.getString("Callsign");
+				} catch (JSONException err) {
+					System.out.println("Error" + err.toString());
+					System.exit(1);
+				}
+			}
+			else
+			{	System.out.println("Error could not open file:" + args[0]);
+			System.exit(1);}
+
 			MainClass mc = new MainClass();
+			mc.setMyCall( myCall  );
 			// initiate the GUI
 			// GUI myGui = new GUI();
 			GUI.xmain(args, qmx, mc);
@@ -157,6 +199,32 @@ public class MainClass {
 			System.out.println("Debug: " + $msg);
 		}
 
+	}
+
+	// Little utility to extract field to JSON object hierachy
+	/**
+	 * @param json_file
+	 * @return
+	 */
+	public static JSONObject getParamAsJSON(String json_file) {
+		File file = new File(json_file);
+		try {
+			String content = new String(Files.readAllBytes(Paths.get(file.toURI())));
+			JSONObject json = new JSONObject(content);
+			return json;
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		return null;
+	}
+
+	public String getMyCall() {
+		return myCall;
+	}
+
+	public  void setMyCall(String myCallin) {
+		myCall = myCallin;
 	}
 
 }

@@ -54,6 +54,9 @@ public class GUI {
 	private boolean isTx = false;
 	private int thisWpm = 20;
 	private int thisMode = 3;
+	// minor and major ticks to minimise impact on CAT traffic
+	private int tickCount = 0;
+	private static int tickLimit = 3;
 
 	/**
 	 * Launch the application.
@@ -63,7 +66,7 @@ public class GUI {
 			@Override
 			public void run() {
 				try {
-					GUI window = new GUI();
+					GUI window = new GUI(ic7000,mc);
 					window.frmGfozIc.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -75,10 +78,10 @@ public class GUI {
 	/**
 	 * Create the application.
 	 */
-	public GUI() {
+	public GUI(XmlRpcQmx ic7000, MainClass mc) {
 		initialize();
-		qmx = new XmlRpcQmx();
-		mc2 = new MainClass();
+		qmx = ic7000;
+		mc2 = mc;
 	}
 
 	/**
@@ -95,7 +98,7 @@ public class GUI {
 		panel_1.setBounds(0, 0, 400, 200);
 		frmGfozIc.getContentPane().add(panel_1);
 		JPanel panel = new JPanel();
-		panel.setBounds(0, 200, 400, 400);
+		panel.setBounds(0, 200, 600, 440);
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		frmGfozIc.getContentPane().add(panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
@@ -175,6 +178,11 @@ public class GUI {
 		panel.add(spinnerMode, gbc_spinnerMode);
 
 		JToggleButton tglbtnNewToggleButton = new JToggleButton("STOP");
+		tglbtnNewToggleButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+			}
+		});
 		GridBagConstraints gbc_tglbtnNewToggleButton = new GridBagConstraints();
 		gbc_tglbtnNewToggleButton.insets = new Insets(0, 0, 5, 0);
 		gbc_tglbtnNewToggleButton.gridx = 2;
@@ -189,7 +197,7 @@ public class GUI {
 		gbc_lcdText.gridx = 0;
 		gbc_lcdText.gridy = 2;
 		panel.add(lcdText, gbc_lcdText);
-		lcdText.setColumns(10);
+		lcdText.setColumns(32);
 
 		JLabel lblLcd = new JLabel("LCD");
 		GridBagConstraints gbc_lblLcd = new GridBagConstraints();
@@ -206,7 +214,7 @@ public class GUI {
 		btnSendCq.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				qmx.sendCatStringmain("");
+				qmx.sendCatStringmain("KY CQ CQ CQ DE "+mc2.getMyCall()+" "+ mc2.getMyCall() +" PSE K");
 				System.out.println("Send M1");
 			}
 		});
@@ -418,6 +426,8 @@ public class GUI {
 
 
 		// set up the timer
+		//
+		// split into regular and not regular
 		//
 		Timer timer = new Timer(100, new ActionListener() {
 			@Override
