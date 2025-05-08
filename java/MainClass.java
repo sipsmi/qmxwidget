@@ -43,6 +43,10 @@ public class MainClass {
 					// TODO Auto-generated constructor stub
 					dispDebug(jsonObj.toString());
 					myCall = jsonObj.getString("Callsign");
+					qmx.setServer( jsonObj.has("Server") ?  jsonObj.getString("Server") : qmx.getServer()   );
+					qmx.setServerPort( jsonObj.has("ServerPort") ?  jsonObj.getString("ServerPort") : qmx.getServerPort()   );
+					qmx.init();
+					
 				} catch (JSONException err) {
 					System.out.println("Error" + err.toString());
 					System.exit(1);

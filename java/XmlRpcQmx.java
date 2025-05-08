@@ -10,8 +10,12 @@ import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 public class XmlRpcQmx {
 
+
+
 	private static XmlRpcClient client;
 	private static boolean debug = false;
+	private static String server = "localhost";
+	private static String serverPort = "12345";
 
 	private static final Map<String, String> catCodeMap = new HashMap<String, String>() {
 		private static final long serialVersionUID = 1L;
@@ -25,20 +29,25 @@ public class XmlRpcQmx {
 	};
 
 	public XmlRpcQmx() {
+
+
+	}
+	
+	public void init() {
 		try {
 		// Configure the XML-RPC client
 		XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-		config.setServerURL(new URL("http://localhost:12345"));
+		config.setServerURL(new URL("http://"+getServer()+":"+getServerPort()));
 		// Create the client instance
 		client = new XmlRpcClient();
 		client.setConfig(config);
 	} catch (Exception e) {
 		System.err.println("XML-RPC Error: " + e.getMessage());
 		e.printStackTrace();
+		System.exit(1);
 	}
 
 	}
-
 
 
 	public  String sendCatStringmain( String arg) {
@@ -101,6 +110,29 @@ public class XmlRpcQmx {
 			System.out.println("Debug: " + $msg);
 		}
 
+	}
+	
+	
+	public static String getServer() {
+		return server;
+	}
+
+
+
+	public static void setServer(String server) {
+		XmlRpcQmx.server = server;
+	}
+
+
+
+	public static String getServerPort() {
+		return serverPort;
+	}
+
+
+
+	public static void setServerPort(String serverPort) {
+		XmlRpcQmx.serverPort = serverPort;
 	}
 
 }

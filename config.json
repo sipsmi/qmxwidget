@@ -1,1 +1,5 @@
-{"Callsign": "G0FOZ"}
+{
+	"Callsign": "G0FOZ",
+	"Server": "127.0.0.1",
+	"ServerPort": "12345"
+}
