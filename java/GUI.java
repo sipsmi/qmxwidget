@@ -1,3 +1,4 @@
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
@@ -56,7 +57,10 @@ public class GUI {
 	private int thisMode = 3;
 	// minor and major ticks to minimise impact on CAT traffic
 	private int tickCount = 0;
-	private static int tickLimit = 3;
+	private static int tickLimit = 5;
+	private static MeterPlot plot;
+	private MeterPlot pplot;
+	private int pwrZCount = 0;
 
 	/**
 	 * Launch the application.
@@ -95,7 +99,7 @@ public class GUI {
 		frmGfozIc.getContentPane().setLayout(null);
 
 		JPanel panel_1 = new JPanel();
-		panel_1.setBounds(0, 0, 400, 200);
+		panel_1.setBounds(0, 0, 800, 200);
 		frmGfozIc.getContentPane().add(panel_1);
 		JPanel panel = new JPanel();
 		panel.setBounds(0, 200, 600, 440);
@@ -405,6 +409,7 @@ public class GUI {
 
 		DefaultValueDataset dataset = new DefaultValueDataset(10D);
 		JFreeChart sdial = createChart(dataset);
+		plot = (MeterPlot) sdial.getPlot();
 		panel_1.setLayout(null);
 		ChartPanel chartpanel = new ChartPanel(sdial);
 		chartpanel.setBounds(0, 0, 400, 200);
@@ -423,15 +428,70 @@ public class GUI {
 		gbc_dial.gridx = 0;
 		gbc_dial.gridy = 0;
 		panel_1.add(chartpanel);
+		
+		DefaultValueDataset dataset2 = new DefaultValueDataset(0D);
+		JFreeChart pdial = createPwrChart(dataset2);
+		pplot = (MeterPlot) pdial.getPlot();
+		ChartPanel pchartpanel = new ChartPanel(pdial);
+		pchartpanel.setBounds(0, 0, 400, 200);
+		pchartpanel.setDomainZoomable(true);
+		pchartpanel.setBorder(null);
+		pchartpanel.setMaximumDrawWidth(400);
+		pchartpanel.setMaximumDrawHeight(200);
+		pchartpanel.setLayout(null);
+		chartpanel.setLocation(400, 0);
+		//chartpanel.setVisible(true);
+		//chartpanel.setDomainZoomable(true);
+		//frmGfozIc.getContentPane().add(chartpanel);
+		panel_1.add(pchartpanel);
 
 
 		// set up the timer
 		//
 		// split into regular and not regular
 		//
-		Timer timer = new Timer(100, new ActionListener() {
+
+		Timer timer = new Timer(10, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
+				
+
+				
+				tickCount++;
+				sig = mc2.getIntFromString(qmx.sendCatStringmain("SM"));
+
+				dataset.setValue(sig);
+				plot.setDataset(dataset);
+				power.setValue(sig);
+				agc = mc2.getIntFromString(qmx.sendCatStringmain("SA"));
+				int tpc = mc2.getIntFromString(qmx.sendCatStringmain("PC"));
+				int tsw = mc2.getIntFromString(qmx.sendCatStringmain("SW"));
+				
+				if ( tpc < 10 )
+				{
+				    pwrZCount++;
+				    if ( pwrZCount > 12 )
+				    {
+				    	pwrZCount = 0;
+				    	pc = tpc; sw = tsw;
+				    }
+				}
+				else { pc = tpc; sw = tsw; }
+				
+				
+				if (oldVal1 != (pc + sw)) {
+					System.out.println("CatResp RX Sig: " + sig + "dB" + " agc/pc/sw " + agc + "/" + pc + "/" + sw);
+					pwrt.setText(Float.toString((float) (pc / 10.0)));
+					swrt.setText(Float.toString((float) (sw / 100.0)));
+					dataset2.setValue(pc/10.0);
+					pplot.setDataset(dataset2);
+					oldVal1 = (pc + sw);
+				}
+				
+				
+				if ( tickCount > tickLimit ) //only so often
+				{
+					tickCount = 0; //reset 
 				statusLabel.setText(qmx.sendCatStringmain("IF") );
 				// TX state
 				isTx = (mc2.getIntFromString(qmx.sendCatStringmain("TQ"))) > 0 ? true : false;
@@ -443,15 +503,9 @@ public class GUI {
 				thisWpm = mc2.getIntFromString(qmx.sendCatStringmain("KS"));
 				wpm.setValue(thisWpm);
 				// signal strenght
-				sig = mc2.getIntFromString(qmx.sendCatStringmain("SM"));
-				MeterPlot plot = (MeterPlot) sdial.getPlot();
-				dataset.setValue(sig);
-				plot.setDataset(dataset);
-				power.setValue(sig);
+
 				lcdText.setText(qmx.sendCatStringmain("LC").replaceAll("(LC|;)", ""));
-				agc = mc2.getIntFromString(qmx.sendCatStringmain("SA"));
-				pc = mc2.getIntFromString(qmx.sendCatStringmain("PC"));
-				sw = mc2.getIntFromString(qmx.sendCatStringmain("SW"));
+
 				// display the VFO contents
 				txtVfoa.setText(Integer.toString(mc2.getIntFromString(qmx.sendCatStringmain("FA"))));
 				txtVfob.setText(Integer.toString(mc2.getIntFromString(qmx.sendCatStringmain("FB"))));
@@ -459,13 +513,8 @@ public class GUI {
 
 
 
-				if (oldVal1 != (pc + sw)) {
-					System.out.println("CatResp RX Sig: " + sig + "dB" + " agc/pc/sw " + agc + "/" + pc + "/" + sw);
-					pwrt.setText(Float.toString((float) (pc / 10.0)));
-					swrt.setText(Float.toString((float) (sw / 100.0)));
-					oldVal1 = (pc + sw);
-				}
 
+				}
 			}
 		});
 		timer.setRepeats(true);
@@ -478,23 +527,35 @@ public class GUI {
           plot.addInterval(new MeterInterval("High", new Range(80.0, 100.0)));
         plot.setDialOutlinePaint(Color.white);
       //  plot.addInterval(new MeterInterval("Low", new Range(0.00, 70.0), Color.RED, new BasicStroke(2.0f), null));
-
-
-
-
         plot.setUnits("dB");
         plot.setTickLabelsVisible(true);
         plot.setDialShape(DialShape.CHORD);
         plot.setValuePaint(Color.GRAY);
-
         //plot.getIntervals().a
         plot.setTickLabelsVisible(true);
         plot.setRange(new Range(0, 100));
         plot.setMeterAngle(180);
         plot.setTickLabelPaint(Color.ORANGE);
-        JFreeChart chart = new JFreeChart("S-meter", JFreeChart.DEFAULT_TITLE_FONT, plot, false);
+        JFreeChart chart = new JFreeChart("RX Signal", JFreeChart.DEFAULT_TITLE_FONT, plot, false);
         return chart;
-
-
+	   }
+    private static JFreeChart createPwrChart(ValueDataset dataset) {
+    	MeterPlot pplot = new MeterPlot(dataset);
+         pplot.addInterval(new MeterInterval("All", new Range(5.0, 6.0)));
+        //  pplot.addInterval(new MeterInterval("High", new Range(4.0, 6.0)));
+        pplot.setDialOutlinePaint(Color.white);
+        pplot.addInterval(new MeterInterval("Low", new Range(1.00, 2.0), Color.RED, new BasicStroke(2.0f), null));
+        pplot.addInterval(new MeterInterval("Mid", new Range(3.0, 4.0), Color.GREEN, new BasicStroke(2.0f), null));
+        pplot.setUnits("Watts");
+        pplot.setTickLabelsVisible(true);
+        pplot.setDialShape(DialShape.CHORD);
+        pplot.setValuePaint(Color.GRAY);
+        //plot.getIntervals().a
+        pplot.setTickLabelsVisible(true);
+        pplot.setRange(new Range(0, 6));
+        pplot.setMeterAngle(180);
+        pplot.setTickLabelPaint(Color.ORANGE);
+        JFreeChart chart = new JFreeChart("TX Power", JFreeChart.DEFAULT_TITLE_FONT, pplot, false);
+        return chart;
 	   }
    }
