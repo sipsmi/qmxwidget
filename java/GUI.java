@@ -35,6 +35,10 @@ import org.jfree.chart.plot.MeterPlot;
 import org.jfree.data.Range;
 import org.jfree.data.general.DefaultValueDataset;
 import org.jfree.data.general.ValueDataset;
+import java.awt.FlowLayout;
+import javax.swing.BoxLayout;
+import javax.swing.SpringLayout;
+import java.awt.Window.Type;
 
 public class GUI {
 
@@ -53,6 +57,7 @@ public class GUI {
 	private JTextField txtVfoa;
 	private JTextField txtVfob;
 	private boolean isTx = false;
+	private boolean lockWPM = false;
 	private int thisWpm = 20;
 	private int thisMode = 3;
 	// minor and major ticks to minimise impact on CAT traffic
@@ -94,7 +99,7 @@ public class GUI {
 	private void initialize() {
 		frmGfozIc = new JFrame();
 		frmGfozIc.setTitle("G0FOZ - QMX Controller");
-		frmGfozIc.setBounds(0, 0, 600, 800);
+		frmGfozIc.setBounds(0, 0, 800, 800);
 		frmGfozIc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmGfozIc.getContentPane().setLayout(null);
 
@@ -102,15 +107,14 @@ public class GUI {
 		panel_1.setBounds(0, 0, 800, 200);
 		frmGfozIc.getContentPane().add(panel_1);
 		JPanel panel = new JPanel();
-		panel.setBounds(0, 200, 600, 440);
+		panel.setBounds(0, 200, 800, 440);
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		frmGfozIc.getContentPane().add(panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		JSpinner spinner = new JSpinner();
-		gbl_panel.columnWidths = new int[] {0, 0, 0, 20, 20};
-		gbl_panel.rowHeights = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel.columnWidths = new int[] {300, 100, 50, 60, 60};
 		gbl_panel.columnWeights = new double[] { 1.0, 0.0, 0.0, Double.MIN_VALUE };
-		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 		panel.setLayout(gbl_panel);
 		JSlider power = new JSlider();
 		power.setPaintLabels(true);
@@ -142,18 +146,19 @@ public class GUI {
 
 		JSlider wpm = new JSlider();
 		wpm.addChangeListener(new ChangeListener() {
+
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				JSlider Temp = (JSlider) e.getSource();
-				if (!Temp.getValueIsAdjusting()) {
-					int value = Temp.getValue();
+				lockWPM = true;
+				//JSlider Temp = (JSlider) e.getSource();
+				if (!wpm.getValueIsAdjusting()) {
+					int value = wpm.getValue();
 					if (qmx != null) {
-						if (debug) {
-							System.out.println("CatResp: " + qmx.sendCatStringmain("KS" + value));
-						}
+						qmx.dispDebug("CatResp: " + qmx.sendCatStringmain("KS" + value));
 						spinner.setValue(value);
+						qmx.dispDebug("WPM" + value);
 					}
-					System.out.println("WPM" + value);
+					lockWPM = false;
 				}
 			}
 
@@ -312,13 +317,14 @@ public class GUI {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				JSpinner Temp = (JSpinner) e.getSource();
-
+				lockWPM = true;
 				int value = (int) Temp.getValue();
 				if (qmx != null) {
-					System.out.println("CatResp: " + qmx.sendCatStringmain("KS" + value));
+					qmx.dispDebug("CatResp: " + qmx.sendCatStringmain("KS" + value));
 					wpm.setValue(value);
-					System.out.println("WPM" + value);
+					qmx.dispDebug("WPM" + value);
 				}
+				lockWPM = false;
 			}
 		});
 		spinner.setModel(new SpinnerNumberModel(Integer.valueOf(20), Integer.valueOf(12), Integer.valueOf(30),
@@ -410,9 +416,7 @@ public class GUI {
 		DefaultValueDataset dataset = new DefaultValueDataset(10D);
 		JFreeChart sdial = createChart(dataset);
 		plot = (MeterPlot) sdial.getPlot();
-		panel_1.setLayout(null);
 		ChartPanel chartpanel = new ChartPanel(sdial);
-		chartpanel.setBounds(0, 0, 400, 200);
 		chartpanel.setDomainZoomable(true);
 		chartpanel.setBorder(null);
 		chartpanel.setMaximumDrawWidth(400);
@@ -427,19 +431,27 @@ public class GUI {
 		gbc_dial.insets = new Insets(0,0,0,0);
 		gbc_dial.gridx = 0;
 		gbc_dial.gridy = 0;
+		SpringLayout sl_panel_1 = new SpringLayout();
+		sl_panel_1.putConstraint(SpringLayout.NORTH, chartpanel, 0, SpringLayout.NORTH, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.WEST, chartpanel, 0, SpringLayout.WEST, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.SOUTH, chartpanel, 200, SpringLayout.NORTH, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.EAST, chartpanel, 400, SpringLayout.WEST, panel_1);
+		panel_1.setLayout(sl_panel_1);
 		panel_1.add(chartpanel);
 		
 		DefaultValueDataset dataset2 = new DefaultValueDataset(0D);
 		JFreeChart pdial = createPwrChart(dataset2);
 		pplot = (MeterPlot) pdial.getPlot();
 		ChartPanel pchartpanel = new ChartPanel(pdial);
-		pchartpanel.setBounds(0, 0, 400, 200);
+		sl_panel_1.putConstraint(SpringLayout.NORTH, pchartpanel, 0, SpringLayout.NORTH, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.WEST, pchartpanel, 400, SpringLayout.WEST, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.SOUTH, pchartpanel, 200, SpringLayout.NORTH, panel_1);
+		sl_panel_1.putConstraint(SpringLayout.EAST, pchartpanel, 800, SpringLayout.WEST, panel_1);
 		pchartpanel.setDomainZoomable(true);
 		pchartpanel.setBorder(null);
 		pchartpanel.setMaximumDrawWidth(400);
 		pchartpanel.setMaximumDrawHeight(200);
 		pchartpanel.setLayout(null);
-		chartpanel.setLocation(400, 0);
 		//chartpanel.setVisible(true);
 		//chartpanel.setDomainZoomable(true);
 		//frmGfozIc.getContentPane().add(chartpanel);
@@ -500,8 +512,11 @@ public class GUI {
 				thisMode = mc2.getIntFromString(qmx.sendCatStringmain("MD"));
 				spinnerMode.setValue( mc2.getModeString(thisMode));
 				// current WPM
-				thisWpm = mc2.getIntFromString(qmx.sendCatStringmain("KS"));
-				wpm.setValue(thisWpm);
+				if ( ! lockWPM )
+				{
+					thisWpm = mc2.getIntFromString(qmx.sendCatStringmain("KS"));
+					wpm.setValue(thisWpm);
+				}
 				// signal strenght
 
 				lcdText.setText(qmx.sendCatStringmain("LC").replaceAll("(LC|;)", ""));

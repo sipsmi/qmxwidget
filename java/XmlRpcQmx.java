@@ -104,7 +104,7 @@ public class XmlRpcQmx {
 
 	}
 	
-	private void dispDebug(String $msg) {
+	public void dispDebug(String $msg) {
 
 		if (debug) {
 			System.out.println("Debug: " + $msg);
