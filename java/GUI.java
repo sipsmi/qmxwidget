@@ -36,6 +36,11 @@ import org.jfree.data.Range;
 import org.jfree.data.general.DefaultValueDataset;
 import org.jfree.data.general.ValueDataset;
 import javax.swing.SpringLayout;
+import javax.swing.border.BevelBorder;
+import java.awt.FlowLayout;
+import javax.swing.BoxLayout;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 
 
 public class GUI {
@@ -62,6 +67,7 @@ public class GUI {
 	private static int tickLimit = 5;
 	private static MeterPlot plot;
 	private MeterPlot pplot;
+	private MeterPlot splot;
 	private int pwrZCount = 0;
 
 	/**
@@ -96,18 +102,30 @@ public class GUI {
 	private void initialize() {
 		frmGfozIc = new JFrame();
 		frmGfozIc.setTitle("G0FOZ - QMX Controller");
-		frmGfozIc.setBounds(0, 0, 800, 800);
+		frmGfozIc.setBounds(0, 0, 1200, 800);
 		frmGfozIc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmGfozIc.getContentPane().setLayout(null);
 
-		JPanel panel_1 = new JPanel();
-		panel_1.setBounds(0, 0, 800, 200);
-		frmGfozIc.getContentPane().add(panel_1);
+		JPanel meter_panel = new JPanel();
+		meter_panel.setBounds(0, 0, 1200, 200);
+		frmGfozIc.getContentPane().add(meter_panel);
 		JPanel panel = new JPanel();
 		panel.setBounds(0, 200, 800, 440);
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		frmGfozIc.getContentPane().add(panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
+		
+		// Power Meter
+		DefaultValueDataset dataset2 = new DefaultValueDataset(0D);
+		JFreeChart pdial = createPwrChart(dataset2);
+		pplot = (MeterPlot) pdial.getPlot();
+		
+		// SWR Meter
+		DefaultValueDataset dataset3 = new DefaultValueDataset(1D);
+		JFreeChart swrdial = createSwrChart(dataset3);
+		splot = (MeterPlot) swrdial.getPlot();
+		
+		
 		JSpinner spinner = new JSpinner();
 		gbl_panel.columnWidths = new int[] { 300, 100, 50, 60, 60 };
 		gbl_panel.columnWeights = new double[] { 1.0, 0.0, 0.0, Double.MIN_VALUE };
@@ -411,12 +429,6 @@ public class GUI {
 		DefaultValueDataset dataset = new DefaultValueDataset(10D);
 		JFreeChart sdial = createChart(dataset);
 		plot = (MeterPlot) sdial.getPlot();
-		ChartPanel chartpanel = new ChartPanel(sdial);
-		chartpanel.setDomainZoomable(true);
-		chartpanel.setBorder(null);
-		chartpanel.setMaximumDrawWidth(400);
-		chartpanel.setMaximumDrawHeight(200);
-		chartpanel.setLayout(null);
 		// chartpanel.setLocation(0, 400);
 		// chartpanel.setVisible(true);
 		// chartpanel.setDomainZoomable(true);
@@ -426,31 +438,45 @@ public class GUI {
 		gbc_dial.insets = new Insets(0, 0, 0, 0);
 		gbc_dial.gridx = 0;
 		gbc_dial.gridy = 0;
-		SpringLayout sl_panel_1 = new SpringLayout();
-		sl_panel_1.putConstraint(SpringLayout.NORTH, chartpanel, 0, SpringLayout.NORTH, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.WEST, chartpanel, 0, SpringLayout.WEST, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.SOUTH, chartpanel, 200, SpringLayout.NORTH, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.EAST, chartpanel, 400, SpringLayout.WEST, panel_1);
-		panel_1.setLayout(sl_panel_1);
-		panel_1.add(chartpanel);
 
-		DefaultValueDataset dataset2 = new DefaultValueDataset(0D);
-		JFreeChart pdial = createPwrChart(dataset2);
-		pplot = (MeterPlot) pdial.getPlot();
+		ChartPanel chartpanel = new ChartPanel(sdial);
+		chartpanel.setBounds(0, 0, 400, 200);
+		chartpanel.setFillZoomRectangle(false);
+		chartpanel.setEnforceFileExtensions(false);
+		//chartpanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		chartpanel.setMaximumDrawWidth(400);
+		chartpanel.setMaximumDrawHeight(200);
+		chartpanel.setLayout(new BoxLayout(chartpanel, BoxLayout.X_AXIS));
+		ChartPanel swrchartpanel = new ChartPanel(swrdial);
+		swrchartpanel.setBounds(400, 0, 400, 200);
+		swrchartpanel.setMinimumDrawWidth(400);
+		//sl_panel_1.putConstraint(SpringLayout.NORTH, pchartpanel, 0, SpringLayout.NORTH, panel_1);
+		//sl_panel_1.putConstraint(SpringLayout.WEST, pchartpanel, 400, SpringLayout.WEST, panel_1);
+		//sl_panel_1.putConstraint(SpringLayout.SOUTH, pchartpanel, 200, SpringLayout.NORTH, panel_1);
+		//sl_panel_1.putConstraint(SpringLayout.EAST, pchartpanel, 400, SpringLayout.WEST, panel_1);
+		swrchartpanel.setDomainZoomable(false);
+		swrchartpanel.setBorder(null);
+		swrchartpanel.setMaximumDrawWidth(400);
+		swrchartpanel.setMaximumDrawHeight(200);
+		swrchartpanel.setLayout(null);
 		ChartPanel pchartpanel = new ChartPanel(pdial);
-		sl_panel_1.putConstraint(SpringLayout.NORTH, pchartpanel, 0, SpringLayout.NORTH, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.WEST, pchartpanel, 400, SpringLayout.WEST, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.SOUTH, pchartpanel, 200, SpringLayout.NORTH, panel_1);
-		sl_panel_1.putConstraint(SpringLayout.EAST, pchartpanel, 800, SpringLayout.WEST, panel_1);
-		pchartpanel.setDomainZoomable(true);
+		pchartpanel.setBounds(800, 0, 400, 200);
+		pchartpanel.setMinimumDrawWidth(400);
+		//sl_panel_1.putConstraint(SpringLayout.NORTH, pchartpanel, 0, SpringLayout.NORTH, panel_1);
+		//sl_panel_1.putConstraint(SpringLayout.WEST, pchartpanel, 400, SpringLayout.WEST, panel_1);
+		//sl_panel_1.putConstraint(SpringLayout.SOUTH, pchartpanel, 200, SpringLayout.NORTH, panel_1);
+		//sl_panel_1.putConstraint(SpringLayout.EAST, pchartpanel, 400, SpringLayout.WEST, panel_1);
+		pchartpanel.setDomainZoomable(false);
 		pchartpanel.setBorder(null);
 		pchartpanel.setMaximumDrawWidth(400);
 		pchartpanel.setMaximumDrawHeight(200);
 		pchartpanel.setLayout(null);
-		// chartpanel.setVisible(true);
-		// chartpanel.setDomainZoomable(true);
-		// frmGfozIc.getContentPane().add(chartpanel);
-		panel_1.add(pchartpanel);
+		meter_panel.setLayout(null);
+		meter_panel.add(chartpanel);
+		meter_panel.add(swrchartpanel);
+		meter_panel.add(pchartpanel);
+		
+
 
 		// set up the timer
 		//
@@ -485,7 +511,9 @@ public class GUI {
 					pwrt.setText(Float.toString((float) (pc / 10.0)));
 					swrt.setText(Float.toString((float) (sw / 100.0)));
 					dataset2.setValue(pc / 10.0);
+					dataset3.setValue((float) (sw / 100.0) );
 					pplot.setDataset(dataset2);
+					splot.setDataset(dataset3);
 					oldVal1 = (pc + sw);
 				}
 
@@ -557,6 +585,26 @@ public class GUI {
 		pplot.setMeterAngle(180);
 		pplot.setTickLabelPaint(Color.ORANGE);
 		JFreeChart chart = new JFreeChart("TX Power", JFreeChart.DEFAULT_TITLE_FONT, pplot, false);
+		return chart;
+	}
+	// define swr meter
+	private static JFreeChart createSwrChart(ValueDataset dataset) {
+		MeterPlot splot = new MeterPlot(dataset);
+		//splot.addInterval(new MeterInterval("All", new Range(5.0, 6.0)));
+		// pplot.addInterval(new MeterInterval("High", new Range(4.0, 6.0)));
+		splot.setDialOutlinePaint(Color.white);
+		splot.addInterval(new MeterInterval("Low", new Range(2.00, 3.0), Color.RED, new BasicStroke(2.0f), null));
+		splot.addInterval(new MeterInterval("Mid", new Range(1.0, 2.0), Color.GREEN, new BasicStroke(2.0f), null));
+		splot.setUnits("VSWR");
+		splot.setTickLabelsVisible(true);
+		splot.setDialShape(DialShape.CHORD);
+		splot.setValuePaint(Color.GRAY);
+		// plot.getIntervals().a
+		splot.setTickLabelsVisible(true);
+		splot.setRange(new Range(1, 3));
+		splot.setMeterAngle(180);
+		splot.setTickLabelPaint(Color.ORANGE);
+		JFreeChart chart = new JFreeChart("SWR", JFreeChart.DEFAULT_TITLE_FONT, splot, false);
 		return chart;
 	}
 }
