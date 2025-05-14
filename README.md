@@ -10,7 +10,11 @@ It will eventually support two modes, direct and via Flrig, but for now only XML
 
 It may be run from a composite JAR file but requires a configuration file:  
 
-java -jar qmx-control.jar   config.json 
+```
+java -jar qmx.jar   config.json 
+```
+
+Remember to change the parameters to suit!
 
 ## Configuration
 
