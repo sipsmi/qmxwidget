@@ -41,6 +41,8 @@ import java.awt.FlowLayout;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
+import java.awt.Font;
+import javax.swing.SwingConstants;
 
 
 public class GUI {
@@ -53,8 +55,6 @@ public class GUI {
 	// Added CAT commands SA (AGC meter), SM (S meter), PC (Power meter), SW (SWR
 	// meter)
 	private int agc, pc, sw = 0;
-	private JTextField pwrt;
-	private JTextField swrt;
 	private int oldVal1 = 0;
 	private JTextField txtVfoa;
 	private JTextField txtVfob;
@@ -110,7 +110,7 @@ public class GUI {
 		meter_panel.setBounds(0, 0, 1200, 200);
 		frmGfozIc.getContentPane().add(meter_panel);
 		JPanel panel = new JPanel();
-		panel.setBounds(0, 200, 800, 440);
+		panel.setBounds(0, 200, 1200, 400);
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		frmGfozIc.getContentPane().add(panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
@@ -124,69 +124,14 @@ public class GUI {
 		DefaultValueDataset dataset3 = new DefaultValueDataset(1D);
 		JFreeChart swrdial = createSwrChart(dataset3);
 		splot = (MeterPlot) swrdial.getPlot();
-		
-		
-		JSpinner spinner = new JSpinner();
-		gbl_panel.columnWidths = new int[] { 300, 100, 50, 60, 60 };
+		gbl_panel.columnWidths = new int[] {600, 60, 50, 60, 400};
 		gbl_panel.columnWeights = new double[] { 1.0, 0.0, 0.0, Double.MIN_VALUE };
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 		panel.setLayout(gbl_panel);
-		JSlider power = new JSlider();
-		power.setPaintLabels(true);
-		power.setMajorTickSpacing(20);
-		power.setMinorTickSpacing(5);
-		power.setPaintTicks(true);
-		// power.addChangeListener(new ChangeListener() {
-		// @Override
-		// public void stateChanged(ChangeEvent evt) {
-		// JSlider Temp = (JSlider) evt.getSource();
-		// if (!Temp.getValueIsAdjusting()) {
-		// int value = Temp.getValue();
-		// ic7000.flrigSetInteger("rig.set_power", value);
-		// System.out.println("Power" + value);
-		// }
-		// }
-		// });
-		// power.setPaintLabels(true);
-		// power.setSnapToTicks(true);
-		// power.setPaintTicks(true);
-		// power.setMinorTickSpacing(2);
-		// power.setMajorTickSpacing(20);
-		GridBagConstraints gbc_power = new GridBagConstraints();
-		gbc_power.fill = GridBagConstraints.BOTH;
-		gbc_power.insets = new Insets(0, 0, 5, 5);
-		gbc_power.gridx = 0;
-		gbc_power.gridy = 0;
-		panel.add(power, gbc_power);
-
-		JSlider wpm = new JSlider();
-		wpm.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				lockWPM = true;
-				// JSlider Temp = (JSlider) e.getSource();
-				if (!wpm.getValueIsAdjusting()) {
-					int value = wpm.getValue();
-					if (qmx != null) {
-						qmx.dispDebug("CatResp: " + qmx.sendCatStringmain("KS" + value));
-						spinner.setValue(value);
-						qmx.dispDebug("WPM" + value);
-					}
-					lockWPM = false;
-				}
-			}
-
-		});
-
-		JLabel lblNewLabel_1 = new JLabel("Signal (dB)");
-		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_1.gridx = 1;
-		gbc_lblNewLabel_1.gridy = 0;
-		panel.add(lblNewLabel_1, gbc_lblNewLabel_1);
 
 		JSpinner spinnerMode = new JSpinner();
+		spinnerMode.setToolTipText("Select Mode");
+		spinnerMode.setFont(new Font("Verdana", Font.PLAIN, 18));
 		spinnerMode.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -194,42 +139,52 @@ public class GUI {
 			}
 
 		});
+				
+						lcdText = new JTextField();
+						lcdText.setFont(new Font("Verdana", Font.BOLD, 16));
+						lcdText.setEditable(false);
+						GridBagConstraints gbc_lcdText = new GridBagConstraints();
+						gbc_lcdText.insets = new Insets(0, 0, 5, 5);
+						gbc_lcdText.fill = GridBagConstraints.HORIZONTAL;
+						gbc_lcdText.gridx = 0;
+						gbc_lcdText.gridy = 0;
+						panel.add(lcdText, gbc_lcdText);
+						lcdText.setColumns(32);
+		
+				JLabel lblLcd = new JLabel("LCD");
+				GridBagConstraints gbc_lblLcd = new GridBagConstraints();
+				gbc_lblLcd.anchor = GridBagConstraints.LINE_START;
+				gbc_lblLcd.insets = new Insets(0, 0, 5, 5);
+				gbc_lblLcd.gridx = 1;
+				gbc_lblLcd.gridy = 0;
+				panel.add(lblLcd, gbc_lblLcd);
 		spinnerMode.setModel(new SpinnerListModel(new String[] { "LSB", "USB", "CW", "FSK", "CWR", "FSR" }));
 		GridBagConstraints gbc_spinnerMode = new GridBagConstraints();
-		gbc_spinnerMode.insets = new Insets(0, 0, 5, 0);
+		gbc_spinnerMode.insets = new Insets(0, 0, 5, 5);
 		gbc_spinnerMode.gridx = 2;
 		gbc_spinnerMode.gridy = 0;
 		panel.add(spinnerMode, gbc_spinnerMode);
-
-		JToggleButton tglbtnNewToggleButton = new JToggleButton("STOP");
-		tglbtnNewToggleButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-
-			}
-		});
-		GridBagConstraints gbc_tglbtnNewToggleButton = new GridBagConstraints();
-		gbc_tglbtnNewToggleButton.insets = new Insets(0, 0, 5, 0);
-		gbc_tglbtnNewToggleButton.gridx = 2;
-		gbc_tglbtnNewToggleButton.gridy = 1;
-		panel.add(tglbtnNewToggleButton, gbc_tglbtnNewToggleButton);
-
-		lcdText = new JTextField();
-		lcdText.setEditable(false);
-		GridBagConstraints gbc_lcdText = new GridBagConstraints();
-		gbc_lcdText.insets = new Insets(0, 0, 5, 5);
-		gbc_lcdText.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lcdText.gridx = 0;
-		gbc_lcdText.gridy = 2;
-		panel.add(lcdText, gbc_lcdText);
-		lcdText.setColumns(32);
-
-		JLabel lblLcd = new JLabel("LCD");
-		GridBagConstraints gbc_lblLcd = new GridBagConstraints();
-		gbc_lblLcd.anchor = GridBagConstraints.LINE_START;
-		gbc_lblLcd.insets = new Insets(0, 0, 5, 5);
-		gbc_lblLcd.gridx = 1;
-		gbc_lblLcd.gridy = 2;
-		panel.add(lblLcd, gbc_lblLcd);
+		
+				txtVfoa = new JTextField();
+				txtVfoa.setHorizontalAlignment(SwingConstants.RIGHT);
+				txtVfoa.setEditable(false);
+				txtVfoa.setText("0");
+				GridBagConstraints gbc_txtVfoa = new GridBagConstraints();
+				gbc_txtVfoa.fill = GridBagConstraints.HORIZONTAL;
+				gbc_txtVfoa.anchor = GridBagConstraints.EAST;
+				gbc_txtVfoa.insets = new Insets(0, 0, 5, 5);
+				gbc_txtVfoa.gridx = 0;
+				gbc_txtVfoa.gridy = 1;
+				panel.add(txtVfoa, gbc_txtVfoa);
+				txtVfoa.setColumns(20);
+		
+				JLabel lblVfoa = new JLabel("VFOA");
+				GridBagConstraints gbc_lblVfoa = new GridBagConstraints();
+				gbc_lblVfoa.anchor = GridBagConstraints.WEST;
+				gbc_lblVfoa.insets = new Insets(0, 0, 5, 5);
+				gbc_lblVfoa.gridx = 1;
+				gbc_lblVfoa.gridy = 1;
+				panel.add(lblVfoa, gbc_lblVfoa);
 
 		// null
 		// mc2.toString();
@@ -242,27 +197,69 @@ public class GUI {
 				System.out.println("Send M1");
 			}
 		});
+		
+				txtVfob = new JTextField();
+				txtVfob.setHorizontalAlignment(SwingConstants.RIGHT);
+				txtVfob.setEditable(false);
+				txtVfob.setText("0");
+				GridBagConstraints gbc_txtVfob = new GridBagConstraints();
+				gbc_txtVfob.fill = GridBagConstraints.HORIZONTAL;
+				gbc_txtVfob.insets = new Insets(0, 0, 5, 5);
+				gbc_txtVfob.gridx = 0;
+				gbc_txtVfob.gridy = 2;
+				panel.add(txtVfob, gbc_txtVfob);
+				txtVfob.setColumns(8);
+		
+				JLabel lblVfob = new JLabel("VFOB");
+				GridBagConstraints gbc_lblVfob = new GridBagConstraints();
+				gbc_lblVfob.anchor = GridBagConstraints.WEST;
+				gbc_lblVfob.insets = new Insets(0, 0, 5, 5);
+				gbc_lblVfob.gridx = 1;
+				gbc_lblVfob.gridy = 2;
+				panel.add(lblVfob, gbc_lblVfob);
+		
+				JSlider wpm = new JSlider();
+				wpm.addChangeListener(new ChangeListener() {
 
-		txtVfoa = new JTextField();
-		txtVfoa.setEditable(false);
-		txtVfoa.setText("0");
-		GridBagConstraints gbc_txtVfoa = new GridBagConstraints();
-		gbc_txtVfoa.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtVfoa.insets = new Insets(0, 0, 5, 5);
-		gbc_txtVfoa.gridx = 0;
-		gbc_txtVfoa.gridy = 3;
-		panel.add(txtVfoa, gbc_txtVfoa);
-		txtVfoa.setColumns(8);
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						lockWPM = true;
+						// JSlider Temp = (JSlider) e.getSource();
+						if (!wpm.getValueIsAdjusting()) {
+							int value = wpm.getValue();
+							if (qmx != null) {
+								qmx.dispDebug("CatResp: " + qmx.sendCatStringmain("KS" + value));
+								qmx.dispDebug("WPM" + value);
+							}
+							lockWPM = false;
+						}
+					}
 
-		JLabel lblVfoa = new JLabel("VFOA");
-		GridBagConstraints gbc_lblVfoa = new GridBagConstraints();
-		gbc_lblVfoa.anchor = GridBagConstraints.WEST;
-		gbc_lblVfoa.insets = new Insets(0, 0, 5, 5);
-		gbc_lblVfoa.gridx = 1;
-		gbc_lblVfoa.gridy = 3;
-		panel.add(lblVfoa, gbc_lblVfoa);
+				});
+				wpm.setMajorTickSpacing(5);
+				wpm.setMinorTickSpacing(1);
+				wpm.setToolTipText("Speed WPM");
+				wpm.setValue(22);
+				wpm.setPaintLabels(true);
+				wpm.setPaintTicks(true);
+				wpm.setMinimum(10);
+				wpm.setMaximum(30);
+				GridBagConstraints gbc_wpm = new GridBagConstraints();
+				gbc_wpm.fill = GridBagConstraints.HORIZONTAL;
+				gbc_wpm.insets = new Insets(0, 0, 5, 5);
+				gbc_wpm.gridx = 0;
+				gbc_wpm.gridy = 3;
+				panel.add(wpm, gbc_wpm);
+		
+				JLabel lblNewLabel_2 = new JLabel("WPM");
+				GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+				gbc_lblNewLabel_2.anchor = GridBagConstraints.LINE_START;
+				gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
+				gbc_lblNewLabel_2.gridx = 1;
+				gbc_lblNewLabel_2.gridy = 3;
+				panel.add(lblNewLabel_2, gbc_lblNewLabel_2);
 		GridBagConstraints gbc_btnSendCq = new GridBagConstraints();
-		gbc_btnSendCq.insets = new Insets(0, 0, 5, 0);
+		gbc_btnSendCq.insets = new Insets(0, 0, 5, 5);
 		gbc_btnSendCq.gridx = 2;
 		gbc_btnSendCq.gridy = 3;
 		panel.add(btnSendCq, gbc_btnSendCq);
@@ -278,130 +275,32 @@ public class GUI {
 				}
 			}
 		});
-
-		txtVfob = new JTextField();
-		txtVfob.setText("0");
-		GridBagConstraints gbc_txtVfob = new GridBagConstraints();
-		gbc_txtVfob.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtVfob.insets = new Insets(0, 0, 5, 5);
-		gbc_txtVfob.gridx = 0;
-		gbc_txtVfob.gridy = 4;
-		panel.add(txtVfob, gbc_txtVfob);
-		txtVfob.setColumns(8);
-
-		JLabel lblVfob = new JLabel("VFOB");
-		GridBagConstraints gbc_lblVfob = new GridBagConstraints();
-		gbc_lblVfob.anchor = GridBagConstraints.WEST;
-		gbc_lblVfob.insets = new Insets(0, 0, 5, 5);
-		gbc_lblVfob.gridx = 1;
-		gbc_lblVfob.gridy = 4;
-		panel.add(lblVfob, gbc_lblVfob);
 		GridBagConstraints gbc_tglbtnPtt = new GridBagConstraints();
-		gbc_tglbtnPtt.insets = new Insets(0, 0, 5, 0);
+		gbc_tglbtnPtt.insets = new Insets(0, 0, 5, 5);
 		gbc_tglbtnPtt.gridx = 2;
 		gbc_tglbtnPtt.gridy = 4;
 		panel.add(tglbtnPtt, gbc_tglbtnPtt);
-		wpm.setMajorTickSpacing(5);
-		wpm.setMinorTickSpacing(1);
-		wpm.setToolTipText("Speed WPM");
-		wpm.setValue(22);
-		wpm.setPaintLabels(true);
-		wpm.setPaintTicks(true);
-		wpm.setMinimum(10);
-		wpm.setMaximum(30);
-		GridBagConstraints gbc_wpm = new GridBagConstraints();
-		gbc_wpm.fill = GridBagConstraints.HORIZONTAL;
-		gbc_wpm.insets = new Insets(0, 0, 5, 5);
-		gbc_wpm.gridx = 0;
-		gbc_wpm.gridy = 5;
-		panel.add(wpm, gbc_wpm);
 
 		// intialise the dials
-		int pwr = 4; // = ic7000.getCATInteger("rig.get_power");
-		power.setValue(pwr);
+		int pwr = 4;
+		
+				JCheckBox chckbxTx = new JCheckBox("TX");
+				chckbxTx.setEnabled(false);
+				// chckbxTx.addItemListener(new ItemListener() {
+				// public void itemStateChanged(ItemEvent ev) {
+				// if (ev.getStateChange() == ItemEvent.SELECTED) {
+				// System.out.println("PTT on" + qmx.sendCatStringmain("TQ1"));
+				// } else if (ev.getStateChange() == ItemEvent.DESELECTED) {
+				// System.out.println("PTT off" + qmx.sendCatStringmain("TQ0"));
+				// }
+				// }
+				// });
 
-		JLabel lblNewLabel_2 = new JLabel("WPM");
-		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
-		gbc_lblNewLabel_2.anchor = GridBagConstraints.LINE_START;
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_2.gridx = 1;
-		gbc_lblNewLabel_2.gridy = 5;
-		panel.add(lblNewLabel_2, gbc_lblNewLabel_2);
-
-		spinner.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				JSpinner Temp = (JSpinner) e.getSource();
-				lockWPM = true;
-				int value = (int) Temp.getValue();
-				if (qmx != null) {
-					qmx.dispDebug("CatResp: " + qmx.sendCatStringmain("KS" + value));
-					wpm.setValue(value);
-					qmx.dispDebug("WPM" + value);
-				}
-				lockWPM = false;
-			}
-		});
-		spinner.setModel(new SpinnerNumberModel(Integer.valueOf(20), Integer.valueOf(12), Integer.valueOf(30),
-				Integer.valueOf(1)));
-		spinner.setToolTipText("Change the thing");
-		GridBagConstraints gbc_spinner = new GridBagConstraints();
-		gbc_spinner.insets = new Insets(0, 0, 5, 0);
-		gbc_spinner.gridx = 2;
-		gbc_spinner.gridy = 5;
-		panel.add(spinner, gbc_spinner);
-
-		pwrt = new JTextField();
-		GridBagConstraints gbc_pwrt = new GridBagConstraints();
-		gbc_pwrt.fill = GridBagConstraints.HORIZONTAL;
-		gbc_pwrt.insets = new Insets(0, 0, 5, 5);
-		gbc_pwrt.gridx = 0;
-		gbc_pwrt.gridy = 6;
-		panel.add(pwrt, gbc_pwrt);
-		pwrt.setColumns(4);
-
-		JLabel lblPwr = new JLabel("PWR");
-		GridBagConstraints gbc_lblPwr = new GridBagConstraints();
-		gbc_lblPwr.anchor = GridBagConstraints.LINE_START;
-		gbc_lblPwr.insets = new Insets(0, 0, 5, 5);
-		gbc_lblPwr.gridx = 1;
-		gbc_lblPwr.gridy = 6;
-		panel.add(lblPwr, gbc_lblPwr);
-
-		swrt = new JTextField();
-		GridBagConstraints gbc_swrt = new GridBagConstraints();
-		gbc_swrt.fill = GridBagConstraints.HORIZONTAL;
-		gbc_swrt.insets = new Insets(0, 0, 5, 5);
-		gbc_swrt.gridx = 0;
-		gbc_swrt.gridy = 7;
-		panel.add(swrt, gbc_swrt);
-		swrt.setColumns(4);
-
-		JLabel lblSwr = new JLabel("SWR");
-		GridBagConstraints gbc_lblSwr = new GridBagConstraints();
-		gbc_lblSwr.anchor = GridBagConstraints.LINE_START;
-		gbc_lblSwr.insets = new Insets(0, 0, 5, 5);
-		gbc_lblSwr.gridx = 1;
-		gbc_lblSwr.gridy = 7;
-		panel.add(lblSwr, gbc_lblSwr);
-
-		JCheckBox chckbxTx = new JCheckBox("TX");
-		chckbxTx.setEnabled(false);
-		// chckbxTx.addItemListener(new ItemListener() {
-		// public void itemStateChanged(ItemEvent ev) {
-		// if (ev.getStateChange() == ItemEvent.SELECTED) {
-		// System.out.println("PTT on" + qmx.sendCatStringmain("TQ1"));
-		// } else if (ev.getStateChange() == ItemEvent.DESELECTED) {
-		// System.out.println("PTT off" + qmx.sendCatStringmain("TQ0"));
-		// }
-		// }
-		// });
-
-		GridBagConstraints gbc_chckbxTx = new GridBagConstraints();
-		gbc_chckbxTx.insets = new Insets(0, 0, 5, 0);
-		gbc_chckbxTx.gridx = 2;
-		gbc_chckbxTx.gridy = 7;
-		panel.add(chckbxTx, gbc_chckbxTx);
+				GridBagConstraints gbc_chckbxTx = new GridBagConstraints();
+				gbc_chckbxTx.insets = new Insets(0, 0, 5, 5);
+				gbc_chckbxTx.gridx = 3;
+				gbc_chckbxTx.gridy = 4;
+				panel.add(chckbxTx, gbc_chckbxTx);
 
 		JPanel statusPanel = new JPanel();
 		statusPanel.setBorder(new TitledBorder(new LineBorder(new Color(184, 207, 229)), "Info", TitledBorder.LEADING,
@@ -492,7 +391,6 @@ public class GUI {
 
 				dataset.setValue(sig);
 				plot.setDataset(dataset);
-				power.setValue(sig);
 				agc = mc2.getIntFromString(qmx.sendCatStringmain("SA"));
 				int tpc = mc2.getIntFromString(qmx.sendCatStringmain("PC"));
 				int tsw = mc2.getIntFromString(qmx.sendCatStringmain("SW"));
@@ -508,8 +406,6 @@ public class GUI {
 				// update GUI only if things have changed
 				if (oldVal1 != (pc + sw)) {
 					qmx.dispDebug("CatResp RX Sig: " + sig + "dB" + " agc/pc/sw " + agc + "/" + pc + "/" + sw);
-					pwrt.setText(Float.toString((float) (pc / 10.0)));
-					swrt.setText(Float.toString((float) (sw / 100.0)));
 					dataset2.setValue(pc / 10.0);
 					dataset3.setValue((float) (sw / 100.0) );
 					pplot.setDataset(dataset2);
