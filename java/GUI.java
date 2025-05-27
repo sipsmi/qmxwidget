@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -50,6 +51,7 @@ public class GUI {
 	private JFrame frmGfozIc;
 	private XmlRpcQmx qmx;// = new XmlRPCIC7000();
 	private MainClass mc2;// = new MainClass();
+	private static RigctlClient rigctl;
 	private int sig = 0;
 	private JTextField lcdText;
 	// Added CAT commands SA (AGC meter), SM (S meter), PC (Power meter), SW (SWR
@@ -69,6 +71,9 @@ public class GUI {
 	private MeterPlot pplot;
 	private MeterPlot splot;
 	private int pwrZCount = 0;
+	private int freqA = 0;
+	private int freqB = 0;
+	private long offset = 12000;
 
 	/**
 	 * Launch the application.
@@ -80,6 +85,7 @@ public class GUI {
 				try {
 					GUI window = new GUI(ic7000, mc);
 					window.frmGfozIc.setVisible(true);
+					GUI.rigctl = new RigctlClient("localhost",4532);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -432,9 +438,19 @@ public class GUI {
 					lcdText.setText(qmx.sendCatStringmain("LC").replaceAll("(LC|;)", ""));
 
 					// display the VFO contents
-					txtVfoa.setText(Integer.toString(mc2.getIntFromString(qmx.sendCatStringmain("FA"))));
-					txtVfob.setText(Integer.toString(mc2.getIntFromString(qmx.sendCatStringmain("FB"))));
+					freqA = mc2.getIntFromString(qmx.sendCatStringmain("FA"));
+					freqB = mc2.getIntFromString(qmx.sendCatStringmain("FB"));
+					txtVfoa.setText(Integer.toString(freqA));
+					txtVfob.setText(Integer.toString(freqB));
 					// qmx.sendCatStringmain("FB");
+					try {
+		
+						rigctl.sendFrequency( (long) freqA - offset  );
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} 
+					
 
 				}
 			}
