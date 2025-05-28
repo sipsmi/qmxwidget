@@ -108,18 +108,24 @@ public class GUI {
 	private void initialize() {
 		frmGfozIc = new JFrame();
 		frmGfozIc.setTitle("G0FOZ - QMX Controller");
-		frmGfozIc.setBounds(0, 0, 1200, 800);
+		frmGfozIc.setBounds(0, 0, 750, 350);
 		frmGfozIc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmGfozIc.getContentPane().setLayout(null);
+		
+		GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.FIRST_LINE_START;
+		
 
 		JPanel meter_panel = new JPanel();
-		meter_panel.setBounds(0, 0, 1200, 200);
-		frmGfozIc.getContentPane().add(meter_panel);
+		meter_panel.setBounds(0, 0, 750, 100);
+		frmGfozIc.getContentPane().add(meter_panel,c);
 		JPanel panel = new JPanel();
-		panel.setBounds(0, 200, 1200, 400);
+		panel.setBounds(0, 100, 750, 250);
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		frmGfozIc.getContentPane().add(panel);
-		GridBagLayout gbl_panel = new GridBagLayout();
+
+		frmGfozIc.getContentPane().add(panel,c);
+
+		GridBagLayout panelLayout = new GridBagLayout();
 		
 		// Power Meter
 		DefaultValueDataset dataset2 = new DefaultValueDataset(0D);
@@ -130,11 +136,10 @@ public class GUI {
 		DefaultValueDataset dataset3 = new DefaultValueDataset(1D);
 		JFreeChart swrdial = createSwrChart(dataset3);
 		splot = (MeterPlot) swrdial.getPlot();
-		gbl_panel.columnWidths = new int[] {600, 60, 50, 60, 400};
-		gbl_panel.columnWeights = new double[] { 1.0, 0.0, 0.0, Double.MIN_VALUE };
-		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-		panel.setLayout(gbl_panel);
-
+		panelLayout.columnWidths = new int[] {500, 60, 50, 0, 00};
+		panelLayout.columnWeights = new double[] { 1.0, 0.0, 0.0, Double.MIN_VALUE };
+		panelLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+		panel.setLayout(panelLayout);
 		JSpinner spinnerMode = new JSpinner();
 		spinnerMode.setToolTipText("Select Mode");
 		spinnerMode.setFont(new Font("Verdana", Font.PLAIN, 18));
@@ -345,36 +350,28 @@ public class GUI {
 		gbc_dial.gridy = 0;
 
 		ChartPanel chartpanel = new ChartPanel(sdial);
-		chartpanel.setBounds(0, 0, 400, 200);
+		chartpanel.setBounds(0, 0, 250, 100);
 		chartpanel.setFillZoomRectangle(false);
 		chartpanel.setEnforceFileExtensions(false);
 		//chartpanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		chartpanel.setMaximumDrawWidth(400);
-		chartpanel.setMaximumDrawHeight(200);
+		chartpanel.setMaximumDrawWidth(250);
+		chartpanel.setMaximumDrawHeight(100);
 		chartpanel.setLayout(new BoxLayout(chartpanel, BoxLayout.X_AXIS));
+		
 		ChartPanel swrchartpanel = new ChartPanel(swrdial);
-		swrchartpanel.setBounds(400, 0, 400, 200);
-		swrchartpanel.setMinimumDrawWidth(400);
-		//sl_panel_1.putConstraint(SpringLayout.NORTH, pchartpanel, 0, SpringLayout.NORTH, panel_1);
-		//sl_panel_1.putConstraint(SpringLayout.WEST, pchartpanel, 400, SpringLayout.WEST, panel_1);
-		//sl_panel_1.putConstraint(SpringLayout.SOUTH, pchartpanel, 200, SpringLayout.NORTH, panel_1);
-		//sl_panel_1.putConstraint(SpringLayout.EAST, pchartpanel, 400, SpringLayout.WEST, panel_1);
+		swrchartpanel.setBounds(250, 0, 250, 100);
 		swrchartpanel.setDomainZoomable(false);
 		swrchartpanel.setBorder(null);
-		swrchartpanel.setMaximumDrawWidth(400);
-		swrchartpanel.setMaximumDrawHeight(200);
+		swrchartpanel.setMaximumDrawWidth(250);
+		swrchartpanel.setMaximumDrawHeight(100);
 		swrchartpanel.setLayout(null);
+		
 		ChartPanel pchartpanel = new ChartPanel(pdial);
-		pchartpanel.setBounds(800, 0, 400, 200);
-		pchartpanel.setMinimumDrawWidth(400);
-		//sl_panel_1.putConstraint(SpringLayout.NORTH, pchartpanel, 0, SpringLayout.NORTH, panel_1);
-		//sl_panel_1.putConstraint(SpringLayout.WEST, pchartpanel, 400, SpringLayout.WEST, panel_1);
-		//sl_panel_1.putConstraint(SpringLayout.SOUTH, pchartpanel, 200, SpringLayout.NORTH, panel_1);
-		//sl_panel_1.putConstraint(SpringLayout.EAST, pchartpanel, 400, SpringLayout.WEST, panel_1);
+		pchartpanel.setBounds(500, 0, 250, 100);
 		pchartpanel.setDomainZoomable(false);
 		pchartpanel.setBorder(null);
-		pchartpanel.setMaximumDrawWidth(400);
-		pchartpanel.setMaximumDrawHeight(200);
+		pchartpanel.setMaximumDrawWidth(250);
+		pchartpanel.setMaximumDrawHeight(100);
 		pchartpanel.setLayout(null);
 		meter_panel.setLayout(null);
 		meter_panel.add(chartpanel);
