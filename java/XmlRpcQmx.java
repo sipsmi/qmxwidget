@@ -1,16 +1,13 @@
+
 //import java.awt.BorderLayout;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 
 public class XmlRpcQmx {
-
-
 
 	private static XmlRpcClient client;
 	private static boolean debug = false;
@@ -20,9 +17,9 @@ public class XmlRpcQmx {
 	private static final Map<String, String> catCodeMap = new HashMap<String, String>() {
 		private static final long serialVersionUID = 1L;
 		{
-			put("preamble","");
-			put("get_wpm","" );
-			put("postamble",";");
+			put("preamble", "");
+			put("get_wpm", "");
+			put("postamble", ";");
 			put("ptton", "TQ1");
 			put("pttoff", "TQ0");
 		}
@@ -30,45 +27,30 @@ public class XmlRpcQmx {
 
 	public XmlRpcQmx() {
 
-
 	}
-	
+
 	public void init() {
 		try {
-		// Configure the XML-RPC client
-		XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-		config.setServerURL(new URL("http://"+getServer()+":"+getServerPort()));
-		// Create the client instance
-		client = new XmlRpcClient();
-		client.setConfig(config);
-	} catch (Exception e) {
-		System.err.println("XML-RPC Error: " + e.getMessage());
-		e.printStackTrace();
-		System.exit(1);
-	}
-
-	}
-
-
-	public  String sendCatStringmain( String arg) {
-		try {
-			String catCode =  catCodeMap.get("preamble")+  arg + catCodeMap.get("postamble");
-			//Object[] catString = new Object[] {};
-			String catresponse = (String) client.execute("rig.cat_string", new Object[] {catCode});
-			dispDebug("Sending cat string "+  catCode );
-			return catresponse;
+			// Configure the XML-RPC client
+			XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
+			config.setServerURL(new URL("http://" + getServer() + ":" + getServerPort()));
+			// Create the client instance
+			client = new XmlRpcClient();
+			client.setConfig(config);
 		} catch (Exception e) {
 			System.err.println("XML-RPC Error: " + e.getMessage());
 			e.printStackTrace();
-			return "Error";
+			System.exit(1);
 		}
 
 	}
-	
-	public  String flrigSetInteger(String command, int value) {
+
+	public String sendCatStringmain(String arg) {
 		try {
-			String catresponse = (String) client.execute(command, new Object[] {value});
-			dispDebug("Sending cat string "+  command + value );
+			String catCode = catCodeMap.get("preamble") + arg + catCodeMap.get("postamble");
+			// Object[] catString = new Object[] {};
+			String catresponse = (String) client.execute("rig.cat_string", new Object[] { catCode });
+			dispDebug("Sending cat string " + catCode);
 			return catresponse;
 		} catch (Exception e) {
 			System.err.println("XML-RPC Error: " + e.getMessage());
@@ -78,9 +60,22 @@ public class XmlRpcQmx {
 
 	}
 
-	public  Integer getCATInteger(String arg) {
+	public String flrigSetInteger(String command, int value) {
 		try {
-			Object[] catString = new Object[] {  };
+			String catresponse = (String) client.execute(command, new Object[] { value });
+			dispDebug("Sending cat string " + command + value);
+			return catresponse;
+		} catch (Exception e) {
+			System.err.println("XML-RPC Error: " + e.getMessage());
+			e.printStackTrace();
+			return "Error";
+		}
+
+	}
+
+	public Integer getCATInteger(String arg) {
+		try {
+			Object[] catString = new Object[] {};
 			Integer catresponse = (Integer) client.execute(arg, catString);
 			return catresponse;
 		} catch (Exception e) {
@@ -91,9 +86,9 @@ public class XmlRpcQmx {
 
 	}
 
-	public String getCATString( String arg) {
+	public String getCATString(String arg) {
 		try {
-			Object[] catString = new Object[] {  };
+			Object[] catString = new Object[] {};
 			String catresponse = (String) client.execute(arg, catString);
 			return catresponse;
 		} catch (Exception e) {
@@ -103,7 +98,7 @@ public class XmlRpcQmx {
 		}
 
 	}
-	
+
 	public void dispDebug(String $msg) {
 
 		if (debug) {
@@ -111,25 +106,18 @@ public class XmlRpcQmx {
 		}
 
 	}
-	
-	
+
 	public static String getServer() {
 		return server;
 	}
-
-
 
 	public static void setServer(String server) {
 		XmlRpcQmx.server = server;
 	}
 
-
-
 	public static String getServerPort() {
 		return serverPort;
 	}
-
-
 
 	public static void setServerPort(String serverPort) {
 		XmlRpcQmx.serverPort = serverPort;

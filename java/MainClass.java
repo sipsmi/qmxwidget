@@ -15,8 +15,8 @@ public class MainClass {
 
 		} catch (Exception e) {
 			System.err.println("Main Class Configuraiton Error: " + e.getMessage());
-			//e.printStackTrace();
-			//System.exit(1);
+			// e.printStackTrace();
+			// System.exit(1);
 		}
 	}
 
@@ -43,21 +43,22 @@ public class MainClass {
 					// TODO Auto-generated constructor stub
 					dispDebug(jsonObj.toString());
 					myCall = jsonObj.getString("Callsign");
-					qmx.setServer( jsonObj.has("Server") ?  jsonObj.getString("Server") : qmx.getServer()   );
-					qmx.setServerPort( jsonObj.has("ServerPort") ?  jsonObj.getString("ServerPort") : qmx.getServerPort()   );
+					qmx.setServer(jsonObj.has("Server") ? jsonObj.getString("Server") : qmx.getServer());
+					qmx.setServerPort(
+							jsonObj.has("ServerPort") ? jsonObj.getString("ServerPort") : qmx.getServerPort());
 					qmx.init();
-					
+
 				} catch (JSONException err) {
 					System.out.println("Error" + err.toString());
 					System.exit(1);
 				}
+			} else {
+				System.out.println("Error could not open file:" + args[0]);
+				System.exit(1);
 			}
-			else
-			{	System.out.println("Error could not open file:" + args[0]);
-			System.exit(1);}
 
 			MainClass mc = new MainClass();
-			mc.setMyCall( myCall  );
+			mc.setMyCall(myCall);
 			// initiate the GUI
 			// GUI myGui = new GUI();
 			GUI.xmain(args, qmx, mc);
@@ -227,7 +228,7 @@ public class MainClass {
 		return myCall;
 	}
 
-	public  void setMyCall(String myCallin) {
+	public void setMyCall(String myCallin) {
 		myCall = myCallin;
 	}
 
