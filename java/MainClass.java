@@ -28,6 +28,7 @@ public class MainClass {
 		try {
 			// initiate the base classes
 			XmlRpcQmx qmx = new XmlRpcQmx();
+			QSerialPort serialPort = new QSerialPort();
 			// get parameters
 			JSONObject jsonObj = null;
 			// Get the paramgers
@@ -43,9 +44,9 @@ public class MainClass {
 					// TODO Auto-generated constructor stub
 					dispDebug(jsonObj.toString());
 					myCall = jsonObj.getString("Callsign");
-					qmx.setServer(jsonObj.has("Server") ? jsonObj.getString("Server") : qmx.getServer());
-					qmx.setServerPort(
-							jsonObj.has("ServerPort") ? jsonObj.getString("ServerPort") : qmx.getServerPort());
+					XmlRpcQmx.setServer(jsonObj.has("Server") ? jsonObj.getString("Server") : XmlRpcQmx.getServer());
+					XmlRpcQmx.setServerPort(
+							jsonObj.has("ServerPort") ? jsonObj.getString("ServerPort") : XmlRpcQmx.getServerPort());
 					qmx.init();
 
 				} catch (JSONException err) {
@@ -61,7 +62,7 @@ public class MainClass {
 			mc.setMyCall(myCall);
 			// initiate the GUI
 			// GUI myGui = new GUI();
-			GUI.xmain(args, qmx, mc);
+			GUI.xmain(args, qmx, mc, serialPort);
 
 		} catch (Exception e) {
 			System.err.println("XML-RPC Error: " + e.getMessage());

@@ -45,6 +45,7 @@ public class GUI {
 	private JFrame frmGfozIc;
 	private XmlRpcQmx qmx;// = new XmlRPCIC7000();
 	private MainClass mc2;// = new MainClass();
+	private static QSerialPort serialPort;
 	private static RigctlClient rigctl;
 	private int sig = 0;
 	private JTextField lcdText;
@@ -72,14 +73,15 @@ public class GUI {
 	/**
 	 * Launch the application.
 	 */
-	public static void xmain(String[] args, XmlRpcQmx ic7000, MainClass mc) {
+	public static void xmain(String[] args, XmlRpcQmx ic7000, MainClass mc, QSerialPort sPort) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					GUI window = new GUI(ic7000, mc);
+					GUI window = new GUI(ic7000, mc, sPort);
 					window.frmGfozIc.setVisible(true);
 					GUI.rigctl = new RigctlClient("localhost", 4532);
+					GUI.serialPort = sPort;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -90,10 +92,11 @@ public class GUI {
 	/**
 	 * Create the application.
 	 */
-	public GUI(XmlRpcQmx ic7000, MainClass mc) {
+	public GUI(XmlRpcQmx ic7000, MainClass mc, QSerialPort sPort) {
 		initialize();
 		qmx = ic7000;
 		mc2 = mc;
+		serialPort = sPort;
 	}
 
 	/**
@@ -139,7 +142,7 @@ public class GUI {
 		spinnerMode.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				qmx.sendCatStringmain("MD" + mc2.setModeInt((String) spinnerMode.getValue()));
+				serialPort.sendCatStringmain("MD" + mc2.setModeInt((String) spinnerMode.getValue()));
 			}
 
 		});
@@ -197,7 +200,7 @@ public class GUI {
 		btnSendCq.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				qmx.sendCatStringmain("KY CQ CQ CQ DE " + mc2.getMyCall() + " " + mc2.getMyCall() + " PSE K");
+				serialPort.sendCatStringmain("KY CQ CQ CQ DE " + mc2.getMyCall() + " " + mc2.getMyCall() + " PSE K");
 				System.out.println("Send M1");
 			}
 		});
@@ -232,7 +235,7 @@ public class GUI {
 				if (!wpm.getValueIsAdjusting()) {
 					int value = wpm.getValue();
 					if (qmx != null) {
-						qmx.dispDebug("CatResp: " + qmx.sendCatStringmain("KS" + value));
+						qmx.dispDebug("CatResp: " + serialPort.sendCatStringmain("KS" + value));
 						qmx.dispDebug("WPM" + value);
 					}
 					lockWPM = false;
@@ -273,9 +276,9 @@ public class GUI {
 			@Override
 			public void itemStateChanged(ItemEvent ev) {
 				if (ev.getStateChange() == ItemEvent.SELECTED) {
-					System.out.println("PTT on" + qmx.sendCatStringmain("TQ1"));
+					System.out.println("PTT on" + serialPort.sendCatStringmain("TQ1"));
 				} else if (ev.getStateChange() == ItemEvent.DESELECTED) {
-					System.out.println("PTT off" + qmx.sendCatStringmain("TQ0"));
+					System.out.println("PTT off" + serialPort.sendCatStringmain("TQ0"));
 				}
 			}
 		});
@@ -369,13 +372,13 @@ public class GUI {
 			public void actionPerformed(ActionEvent evt) {
 				// section for fas queries
 				tickCount++;
-				sig = mc2.getIntFromString(qmx.sendCatStringmain("SM"));
+				sig = mc2.getIntFromString(serialPort.sendCatStringmain("SM"));
 
 				dataset.setValue(sig);
 				plot.setDataset(dataset);
-				agc = mc2.getIntFromString(qmx.sendCatStringmain("SA"));
-				int tpc = mc2.getIntFromString(qmx.sendCatStringmain("PC"));
-				int tsw = mc2.getIntFromString(qmx.sendCatStringmain("SW"));
+				agc = mc2.getIntFromString(serialPort.sendCatStringmain("SA"));
+				int tpc = mc2.getIntFromString(serialPort.sendCatStringmain("PC"));
+				int tsw = mc2.getIntFromString(serialPort.sendCatStringmain("SW"));
 				// only go to zero if been there for a hilen (QSK PTT(
 				if (tpc < 10) {
 					pwrZCount++;
@@ -401,24 +404,25 @@ public class GUI {
 				if (tickCount > tickLimit) // only so often
 				{
 					tickCount = 0; // reset
-					statusLabel.setText(qmx.sendCatStringmain("IF"));
+					statusLabel.setText(serialPort.sendCatStringmain("IF"));
 					// TX state
-					isTx = (mc2.getIntFromString(qmx.sendCatStringmain("TQ"))) > 0 ? true : false;
+					isTx = (mc2.getIntFromString(serialPort.sendCatStringmain("TQ"))) > 0 ? true : false;
 					chckbxTx.setSelected(isTx);
 					// currentn mode
-					thisMode = mc2.getIntFromString(qmx.sendCatStringmain("MD"));
+					thisMode = mc2.getIntFromString(serialPort.sendCatStringmain("MD"));
 					spinnerMode.setValue(mc2.getModeString(thisMode));
 					// current WPM
 					if (!lockWPM) {
-						thisWpm = mc2.getIntFromString(qmx.sendCatStringmain("KS"));
+						thisWpm = mc2.getIntFromString(serialPort.sendCatStringmain("KS"));
 						wpm.setValue(thisWpm);
 					}
 					// signal strenght
-					lcdText.setText(qmx.sendCatStringmain("LC").replaceAll("(LC|;)", ""));
+					//lcdText.setText(qmx.sendCatStringmain("LC").replaceAll("(LC|;)", ""));
+					lcdText.setText(serialPort.sendCatStringmain("LC").replaceAll("(LC|;)", "")   );
 
 					// display the VFO contents
-					freqA = mc2.getIntFromString(qmx.sendCatStringmain("FA"));
-					freqB = mc2.getIntFromString(qmx.sendCatStringmain("FB"));
+					freqA = mc2.getIntFromString(serialPort.sendCatStringmain("FA"));
+					freqB = mc2.getIntFromString(serialPort.sendCatStringmain("FB"));
 					txtVfoa.setText(Integer.toString(freqA));
 					txtVfob.setText(Integer.toString(freqB));
 					// qmx.sendCatStringmain("FB");

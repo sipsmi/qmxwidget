@@ -13,6 +13,7 @@ public class XmlRpcQmx {
 	private static boolean debug = false;
 	private static String server = "localhost";
 	private static String serverPort = "12345";
+	private static boolean commsIsOpen = false;
 
 	private static final Map<String, String> catCodeMap = new HashMap<String, String>() {
 		private static final long serialVersionUID = 1L;
@@ -26,7 +27,7 @@ public class XmlRpcQmx {
 	};
 
 	public XmlRpcQmx() {
-
+		setCommsIsOpen( true );
 	}
 
 	public void init() {
@@ -37,16 +38,19 @@ public class XmlRpcQmx {
 			// Create the client instance
 			client = new XmlRpcClient();
 			client.setConfig(config);
+
 		} catch (Exception e) {
 			System.err.println("XML-RPC Error: " + e.getMessage());
-			e.printStackTrace();
+			checkErrorResponse(e);
+			//e.printStackTrace();
 			System.exit(1);
 		}
+	
 
 	}
 
 	public String sendCatStringmain(String arg) {
-		try {
+		if ( commsIsOpen) try {
 			String catCode = catCodeMap.get("preamble") + arg + catCodeMap.get("postamble");
 			// Object[] catString = new Object[] {};
 			String catresponse = (String) client.execute("rig.cat_string", new Object[] { catCode });
@@ -54,48 +58,56 @@ public class XmlRpcQmx {
 			return catresponse;
 		} catch (Exception e) {
 			System.err.println("XML-RPC Error: " + e.getMessage());
-			e.printStackTrace();
+			checkErrorResponse(e);
+			//e.printStackTrace();
 			return "Error";
 		}
+		else return "Error";
 
 	}
 
 	public String flrigSetInteger(String command, int value) {
-		try {
+		if ( commsIsOpen) try {
 			String catresponse = (String) client.execute(command, new Object[] { value });
 			dispDebug("Sending cat string " + command + value);
 			return catresponse;
 		} catch (Exception e) {
 			System.err.println("XML-RPC Error: " + e.getMessage());
-			e.printStackTrace();
+			checkErrorResponse(e);
+			//e.printStackTrace();
 			return "Error";
 		}
+		else return "Error";
 
 	}
 
 	public Integer getCATInteger(String arg) {
-		try {
+		if ( commsIsOpen) try {
 			Object[] catString = new Object[] {};
 			Integer catresponse = (Integer) client.execute(arg, catString);
 			return catresponse;
 		} catch (Exception e) {
 			System.err.println("XML-RPC Error: " + e.getMessage());
-			e.printStackTrace();
+			checkErrorResponse(e);
+			//e.printStackTrace();
 			return 0;
 		}
+		else return 0;
 
 	}
 
 	public String getCATString(String arg) {
-		try {
+		if ( commsIsOpen) try {
 			Object[] catString = new Object[] {};
 			String catresponse = (String) client.execute(arg, catString);
 			return catresponse;
 		} catch (Exception e) {
 			System.err.println("XML-RPC Error: " + e.getMessage());
-			e.printStackTrace();
+			checkErrorResponse(e);
+			//e.printStackTrace();
 			return "Error";
 		}
+		else return "Error";
 
 	}
 
@@ -122,5 +134,20 @@ public class XmlRpcQmx {
 	public static void setServerPort(String serverPort) {
 		XmlRpcQmx.serverPort = serverPort;
 	}
+
+	public static boolean isCommsIsOpen() {
+		return XmlRpcQmx.commsIsOpen;
+	}
+
+	private static void setCommsIsOpen(boolean setter) {
+		XmlRpcQmx.commsIsOpen = setter;
+	}
+	
+	private static void checkErrorResponse(Exception e) {
+		if ( e.getMessage().matches("(?i).*Connection refused.*")  )	setCommsIsOpen( false );
+		#System.out.println( "Is Open: "+XmlRpcQmx.isCommsIsOpen() + " "+ e.getMessage() );
+	}
+	
+	
 
 }
