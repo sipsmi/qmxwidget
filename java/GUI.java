@@ -21,11 +21,15 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SpinnerListModel;
 import javax.swing.Timer;
+import javax.swing.UIManager;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.plaf.basic.BasicIconFactory;
+import javax.swing.plaf.metal.MetalIconFactory;
+import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -272,14 +276,16 @@ public class GUI {
 		JPanel panel_1 = new JPanel();
 		panel.add(panel_1);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[] {10, 10, 30, 0};
+		gbl_panel_1.columnWidths = new int[] {10, 10, 50, 0};
 		gbl_panel_1.rowHeights = new int[]{0, 0, 0};
 		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 		
 		JButton btnUp = new JButton("");
-		btnUp.setIcon(new ImageIcon(GUI.class.getResource("/javax/swing/plaf/metal/icons/sortUp.png")));
+		ImageIcon upIcon = (ImageIcon) UIManager.getIcon("Table.ascendingSortIcon");
+		btnUp.setIcon( upIcon);
+
 		GridBagConstraints gbc_btnUp = new GridBagConstraints();
 		gbc_btnUp.anchor = GridBagConstraints.NORTHEAST;
 		gbc_btnUp.insets = new Insets(0, 0, 5, 5);
@@ -298,7 +304,8 @@ public class GUI {
 
 		
 		JButton btnDwn = new JButton("");
-		btnDwn.setIcon(new ImageIcon(GUI.class.getResource("/javax/swing/plaf/metal/icons/sortDown.png")));
+		ImageIcon downIcon = (ImageIcon) UIManager.getIcon("Table.descendingSortIcon");
+		btnDwn.setIcon( downIcon);
 		GridBagConstraints gbc_btnDwn = new GridBagConstraints();
 		gbc_btnDwn.insets = new Insets(0, 0, 5, 0);
 		gbc_btnDwn.anchor = GridBagConstraints.NORTHEAST;
@@ -324,7 +331,7 @@ public class GUI {
 			}
 
 		});
-		spinnerFreqStep.setModel(new SpinnerListModel(new String[] {"100 HZ", "500 HZ", "1 KHz"}));
+		spinnerFreqStep.setModel(new SpinnerListModel(new String[] {" 100 HZ", " 500 HZ", " 1 KHz", "10 KHz", "100 KHz", " 1 MHz"}));
 		GridBagConstraints gbc_spinnerFreqStep = new GridBagConstraints();
 		gbc_spinnerFreqStep.fill = GridBagConstraints.BOTH;
 		gbc_spinnerFreqStep.insets = new Insets(0, 0, 0, 5);

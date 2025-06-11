@@ -167,16 +167,24 @@ public class MainClass {
 		try {
 			int retval = 500;
 			switch (stepStr) {
-			case "100 Hz":
+			case " 100 Hz":
 				retval = 100;
 				break;
-			case "500Hz":
+			case "500 Hz":
 				retval = 500;
 				break;
-			case "1 KHz":
+			case " 1 KHz":
 				retval = 1000;
 				break;
-
+			case "10 KHz":
+				retval = 10000;
+				break;
+			case "100 KHz":
+				retval = 100000;
+				break;
+			case " 1 MHz":
+				retval = 1000000;
+				break;
 			default:
 				break;
 
