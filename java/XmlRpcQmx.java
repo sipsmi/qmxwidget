@@ -26,6 +26,10 @@ public class XmlRpcQmx {
 		}
 	};
 
+	public static Map<String, String> getCatcodemap() {
+		return catCodeMap;
+	}
+
 	public XmlRpcQmx() {
 		setCommsIsOpen( true );
 	}
@@ -145,7 +149,7 @@ public class XmlRpcQmx {
 	
 	private static void checkErrorResponse(Exception e) {
 		if ( e.getMessage().matches("(?i).*Connection refused.*")  )	setCommsIsOpen( false );
-		#System.out.println( "Is Open: "+XmlRpcQmx.isCommsIsOpen() + " "+ e.getMessage() );
+		//System.out.println( "Is Open: "+XmlRpcQmx.isCommsIsOpen() + " "+ e.getMessage() );
 	}
 	
 	

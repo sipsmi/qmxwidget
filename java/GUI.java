@@ -36,6 +36,10 @@ import org.jfree.data.Range;
 import org.jfree.data.general.DefaultValueDataset;
 import org.jfree.data.general.ValueDataset;
 
+import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortDataListener;
+import com.fazecast.jSerialComm.SerialPortEvent;
+
 import javax.swing.BoxLayout;
 import java.awt.Font;
 import javax.swing.SwingConstants;
@@ -56,7 +60,7 @@ public class GUI {
 	private JTextField txtVfoa;
 	private JTextField txtVfob;
 	private boolean isTx = false;
-	private boolean lockWPM = false;
+	private boolean lock = false;
 	private int thisWpm = 20;
 	private int thisMode = 3;
 	// minor and major ticks to minimise impact on CAT traffic
@@ -69,6 +73,10 @@ public class GUI {
 	private int freqA = 0;
 	private int freqB = 0;
 	private long offset = 12000;
+	private String responseString = null;
+	String sCommand = "";
+	private int tsw = 0; // variable for read swr
+	private int tpc = 0; // variable for read power
 
 	/**
 	 * Launch the application.
@@ -230,15 +238,15 @@ public class GUI {
 
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				lockWPM = true;
+				lock = true;
 				// JSlider Temp = (JSlider) e.getSource();
 				if (!wpm.getValueIsAdjusting()) {
 					int value = wpm.getValue();
 					if (qmx != null) {
-						qmx.dispDebug("CatResp: " + serialPort.sendCatStringmain("KS" + value));
+						serialPort.sendCatStringmain("KS" + value); 
 						qmx.dispDebug("WPM" + value);
 					}
-					lockWPM = false;
+					lock = false;
 				}
 			}
 
@@ -275,11 +283,13 @@ public class GUI {
 		tglbtnPtt.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent ev) {
+				lock = true;
 				if (ev.getStateChange() == ItemEvent.SELECTED) {
 					System.out.println("PTT on" + serialPort.sendCatStringmain("TQ1"));
 				} else if (ev.getStateChange() == ItemEvent.DESELECTED) {
 					System.out.println("PTT off" + serialPort.sendCatStringmain("TQ0"));
 				}
+				lock = false;
 			}
 		});
 		GridBagConstraints gbc_tglbtnPtt = new GridBagConstraints();
@@ -287,9 +297,6 @@ public class GUI {
 		gbc_tglbtnPtt.gridx = 2;
 		gbc_tglbtnPtt.gridy = 4;
 		panel.add(tglbtnPtt, gbc_tglbtnPtt);
-
-		// intialise the dials
-		int pwr = 4;
 
 		JCheckBox chckbxTx = new JCheckBox("TX");
 		chckbxTx.setEnabled(false);
@@ -365,20 +372,85 @@ public class GUI {
 		// set up the timer
 		//
 		// split into regular and not regular
-		//
 
-		Timer timer = new Timer(10, new ActionListener() {
+		Timer timer = new Timer(20, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
-				// section for fas queries
-				tickCount++;
-				sig = mc2.getIntFromString(serialPort.sendCatStringmain("SM"));
 
-				dataset.setValue(sig);
-				plot.setDataset(dataset);
-				agc = mc2.getIntFromString(serialPort.sendCatStringmain("SA"));
-				int tpc = mc2.getIntFromString(serialPort.sendCatStringmain("PC"));
-				int tsw = mc2.getIntFromString(serialPort.sendCatStringmain("SW"));
+				// process reponse queue here
+				while (serialPort.sizeResponse() > 0) {
+					responseString = serialPort.fetchAndRemoveResponse();
+					if (responseString == null || responseString.charAt(0) == '?' || responseString.length() < 2) {
+						// System.out.println("INvalid reponse received: "+responseString );
+						continue;
+					} else if (responseString.charAt(2) == ';') {
+						// System.out.println("Confirmation reponse received: "+responseString );
+						continue;
+					}
+					String sc = responseString.substring(0, 2);
+					//System.out.println("Process reponse(" + sc + "): " + responseString);
+					switch (sc) {
+					case "SM":
+						sig = mc2.getIntFromString(responseString);
+						dataset.setValue(sig);
+						plot.setDataset(dataset);
+						break;
+					case "FA":
+						freqA = mc2.getIntFromString(responseString);
+						txtVfoa.setText(mc2.getHumanFreqString(freqA));
+						break;
+					case "FB":
+						freqB = mc2.getIntFromString(responseString);
+						txtVfob.setText(mc2.getHumanFreqString(freqB));
+						break;
+					case "PC":
+						tpc = mc2.getIntFromString(responseString);
+						break;
+					case "SW":
+						tsw = mc2.getIntFromString(responseString);
+						break;
+					case "LC":
+						lcdText.setText(responseString.replaceAll("(LC|;)", ""));
+						break;
+					case "IF":
+						statusLabel.setText(responseString);
+						break;
+					// agc = mc2.getIntFromString(serialPort.sendCatStringmain("SA"));
+					// int tpc = mc2.getIntFromString(serialPort.sendCatStringmain("PC"));
+					// int tsw = mc2.getIntFromString(serialPort.sendCatStringmain("SW"));
+					case "TQ":
+						// TX state
+						isTx = (mc2.getIntFromString(responseString) > 0) ? true : false;
+						chckbxTx.setSelected(isTx);
+						break;
+					case "MD":
+						// currentn mode
+						thisMode = mc2.getIntFromString(responseString);
+						spinnerMode.setValue(mc2.getModeString(thisMode));
+						break;
+					case "KS":
+						// current WPM
+						if (!lock) {
+							thisWpm = mc2.getIntFromString(responseString);
+							wpm.setValue(thisWpm);
+						}
+						break;
+
+					default:
+						System.out.println("Process reponse not supported (" + sc + "): " + responseString);
+					}
+
+				}
+
+				// section for fast queries
+				tickCount++;
+				serialPort.sendCatStringmain("SM"); // request signal
+				serialPort.sendCatStringmain("PC");
+				serialPort.sendCatStringmain("SW");
+
+				// agc = mc2.getIntFromString(serialPort.sendCatStringmain("SA"));
+				// int tpc = mc2.getIntFromString(serialPort.sendCatStringmain("PC"));
+				// int tsw = mc2.getIntFromString(serialPort.sendCatStringmain("SW"));
 				// only go to zero if been there for a hilen (QSK PTT(
 				if (tpc < 10) {
 					pwrZCount++;
@@ -403,34 +475,19 @@ public class GUI {
 
 				if (tickCount > tickLimit) // only so often
 				{
+
 					tickCount = 0; // reset
-					statusLabel.setText(serialPort.sendCatStringmain("IF"));
-					// TX state
-					isTx = (mc2.getIntFromString(serialPort.sendCatStringmain("TQ"))) > 0 ? true : false;
-					chckbxTx.setSelected(isTx);
-					// currentn mode
-					thisMode = mc2.getIntFromString(serialPort.sendCatStringmain("MD"));
-					spinnerMode.setValue(mc2.getModeString(thisMode));
-					// current WPM
-					if (!lockWPM) {
-						thisWpm = mc2.getIntFromString(serialPort.sendCatStringmain("KS"));
-						wpm.setValue(thisWpm);
-					}
-					// signal strenght
-					//lcdText.setText(qmx.sendCatStringmain("LC").replaceAll("(LC|;)", ""));
-					lcdText.setText(serialPort.sendCatStringmain("LC").replaceAll("(LC|;)", "")   );
-
+					serialPort.sendCatStringmain("IF");
+					serialPort.sendCatStringmain("TQ");
+					serialPort.sendCatStringmain("MD");
+					serialPort.sendCatStringmain("KS");
+					serialPort.sendCatStringmain("LC");
 					// display the VFO contents
-					freqA = mc2.getIntFromString(serialPort.sendCatStringmain("FA"));
-					freqB = mc2.getIntFromString(serialPort.sendCatStringmain("FB"));
-					txtVfoa.setText(Integer.toString(freqA));
-					txtVfob.setText(Integer.toString(freqB));
-					// qmx.sendCatStringmain("FB");
+					serialPort.sendCatStringmain("FA");
+					serialPort.sendCatStringmain("FB");
 					try {
-
 						rigctl.sendFrequency((long) freqA - offset);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 

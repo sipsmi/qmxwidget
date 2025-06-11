@@ -232,5 +232,10 @@ public class MainClass {
 	public void setMyCall(String myCallin) {
 		myCall = myCallin;
 	}
+	
+    public String getHumanFreqString(int ifreq) {
+        float f =  ifreq / 1000000.0f;
+        return String.format("%#11.6f MHz",f);
+    }
 
 }
