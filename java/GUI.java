@@ -43,6 +43,13 @@ import com.fazecast.jSerialComm.SerialPortEvent;
 import javax.swing.BoxLayout;
 import java.awt.Font;
 import javax.swing.SwingConstants;
+import java.awt.Button;
+import javax.swing.ImageIcon;
+import java.awt.FlowLayout;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.awt.GridLayout;
+import javax.swing.SpringLayout;
 
 public class GUI {
 
@@ -77,6 +84,7 @@ public class GUI {
 	String sCommand = "";
 	private int tsw = 0; // variable for read swr
 	private int tpc = 0; // variable for read power
+	private int freqStep = 100;
 
 	/**
 	 * Launch the application.
@@ -119,17 +127,17 @@ public class GUI {
 
 		GridBagConstraints c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.FIRST_LINE_START;
+		GridBagConstraints c2 = new GridBagConstraints();
+		c2.anchor = GridBagConstraints.FIRST_LINE_START;
 
 		JPanel meter_panel = new JPanel();
 		meter_panel.setBounds(0, 0, 750, 100);
 		frmGfozIc.getContentPane().add(meter_panel, c);
 		JPanel panel = new JPanel();
-		panel.setBounds(0, 100, 750, 250);
+		panel.setBounds(0, 105, 750, 350);
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 
-		frmGfozIc.getContentPane().add(panel, c);
-
-		GridBagLayout panelLayout = new GridBagLayout();
+		frmGfozIc.getContentPane().add(panel, c2);
 
 		// Power Meter
 		DefaultValueDataset dataset2 = new DefaultValueDataset(0D);
@@ -140,10 +148,6 @@ public class GUI {
 		DefaultValueDataset dataset3 = new DefaultValueDataset(1D);
 		JFreeChart swrdial = createSwrChart(dataset3);
 		splot = (MeterPlot) swrdial.getPlot();
-		panelLayout.columnWidths = new int[] { 500, 60, 50, 0, 00 };
-		panelLayout.columnWeights = new double[] { 1.0, 0.0, 0.0, Double.MIN_VALUE };
-		panelLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-		panel.setLayout(panelLayout);
 		JSpinner spinnerMode = new JSpinner();
 		spinnerMode.setToolTipText("Select Mode");
 		spinnerMode.setFont(new Font("Verdana", Font.PLAIN, 18));
@@ -154,52 +158,32 @@ public class GUI {
 			}
 
 		});
+		FlowLayout fl_panel = new FlowLayout(FlowLayout.LEFT, 5, 5);
+		panel.setLayout(fl_panel);
 
 		lcdText = new JTextField();
 		lcdText.setFont(new Font("Verdana", Font.BOLD, 16));
 		lcdText.setEditable(false);
-		GridBagConstraints gbc_lcdText = new GridBagConstraints();
-		gbc_lcdText.insets = new Insets(0, 0, 5, 5);
-		gbc_lcdText.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lcdText.gridx = 0;
-		gbc_lcdText.gridy = 0;
-		panel.add(lcdText, gbc_lcdText);
+		panel.add(lcdText);
 		lcdText.setColumns(32);
 
 		JLabel lblLcd = new JLabel("LCD");
-		GridBagConstraints gbc_lblLcd = new GridBagConstraints();
-		gbc_lblLcd.anchor = GridBagConstraints.LINE_START;
-		gbc_lblLcd.insets = new Insets(0, 0, 5, 5);
-		gbc_lblLcd.gridx = 1;
-		gbc_lblLcd.gridy = 0;
-		panel.add(lblLcd, gbc_lblLcd);
+		panel.add(lblLcd);
 		spinnerMode.setModel(new SpinnerListModel(new String[] { "LSB", "USB", "CW", "FSK", "CWR", "FSR" }));
-		GridBagConstraints gbc_spinnerMode = new GridBagConstraints();
-		gbc_spinnerMode.insets = new Insets(0, 0, 5, 5);
-		gbc_spinnerMode.gridx = 2;
-		gbc_spinnerMode.gridy = 0;
-		panel.add(spinnerMode, gbc_spinnerMode);
+		panel.add(spinnerMode);
+		
+		JLabel label = new JLabel("");
+		panel.add(label);
 
 		txtVfoa = new JTextField();
 		txtVfoa.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtVfoa.setEditable(false);
 		txtVfoa.setText("0");
-		GridBagConstraints gbc_txtVfoa = new GridBagConstraints();
-		gbc_txtVfoa.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtVfoa.anchor = GridBagConstraints.EAST;
-		gbc_txtVfoa.insets = new Insets(0, 0, 5, 5);
-		gbc_txtVfoa.gridx = 0;
-		gbc_txtVfoa.gridy = 1;
-		panel.add(txtVfoa, gbc_txtVfoa);
-		txtVfoa.setColumns(20);
+		panel.add(txtVfoa);
+		txtVfoa.setColumns(14);
 
 		JLabel lblVfoa = new JLabel("VFOA");
-		GridBagConstraints gbc_lblVfoa = new GridBagConstraints();
-		gbc_lblVfoa.anchor = GridBagConstraints.WEST;
-		gbc_lblVfoa.insets = new Insets(0, 0, 5, 5);
-		gbc_lblVfoa.gridx = 1;
-		gbc_lblVfoa.gridy = 1;
-		panel.add(lblVfoa, gbc_lblVfoa);
+		panel.add(lblVfoa);
 
 		// null
 		// mc2.toString();
@@ -212,26 +196,23 @@ public class GUI {
 				System.out.println("Send M1");
 			}
 		});
+		
+		JButton buttonVfoA = new JButton("VFO A");
+		panel.add(buttonVfoA);
+		
+		JLabel label_1 = new JLabel("");
+		panel.add(label_1);
 
 		txtVfob = new JTextField();
 		txtVfob.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtVfob.setEditable(false);
 		txtVfob.setText("0");
-		GridBagConstraints gbc_txtVfob = new GridBagConstraints();
-		gbc_txtVfob.fill = GridBagConstraints.HORIZONTAL;
-		gbc_txtVfob.insets = new Insets(0, 0, 5, 5);
-		gbc_txtVfob.gridx = 0;
-		gbc_txtVfob.gridy = 2;
-		panel.add(txtVfob, gbc_txtVfob);
-		txtVfob.setColumns(8);
+		panel.add(txtVfob);
+		txtVfob.setColumns(14);
 
 		JLabel lblVfob = new JLabel("VFOB");
-		GridBagConstraints gbc_lblVfob = new GridBagConstraints();
-		gbc_lblVfob.anchor = GridBagConstraints.WEST;
-		gbc_lblVfob.insets = new Insets(0, 0, 5, 5);
-		gbc_lblVfob.gridx = 1;
-		gbc_lblVfob.gridy = 2;
-		panel.add(lblVfob, gbc_lblVfob);
+		lblVfob.setHorizontalAlignment(SwingConstants.CENTER);
+		panel.add(lblVfob);
 
 		JSlider wpm = new JSlider();
 		wpm.addChangeListener(new ChangeListener() {
@@ -251,6 +232,12 @@ public class GUI {
 			}
 
 		});
+		
+		JButton buttonVfoB = new JButton("VFO B");
+		panel.add(buttonVfoB);
+		
+		JLabel label_2 = new JLabel("");
+		panel.add(label_2);
 		wpm.setMajorTickSpacing(5);
 		wpm.setMinorTickSpacing(1);
 		wpm.setToolTipText("Speed WPM");
@@ -259,25 +246,11 @@ public class GUI {
 		wpm.setPaintTicks(true);
 		wpm.setMinimum(10);
 		wpm.setMaximum(30);
-		GridBagConstraints gbc_wpm = new GridBagConstraints();
-		gbc_wpm.fill = GridBagConstraints.HORIZONTAL;
-		gbc_wpm.insets = new Insets(0, 0, 5, 5);
-		gbc_wpm.gridx = 0;
-		gbc_wpm.gridy = 3;
-		panel.add(wpm, gbc_wpm);
+		panel.add(wpm);
 
 		JLabel lblNewLabel_2 = new JLabel("WPM");
-		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
-		gbc_lblNewLabel_2.anchor = GridBagConstraints.LINE_START;
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_2.gridx = 1;
-		gbc_lblNewLabel_2.gridy = 3;
-		panel.add(lblNewLabel_2, gbc_lblNewLabel_2);
-		GridBagConstraints gbc_btnSendCq = new GridBagConstraints();
-		gbc_btnSendCq.insets = new Insets(0, 0, 5, 5);
-		gbc_btnSendCq.gridx = 2;
-		gbc_btnSendCq.gridy = 3;
-		panel.add(btnSendCq, gbc_btnSendCq);
+		panel.add(lblNewLabel_2);
+		panel.add(btnSendCq);
 
 		JToggleButton tglbtnPtt = new JToggleButton("PTT");
 		tglbtnPtt.addItemListener(new ItemListener() {
@@ -292,43 +265,98 @@ public class GUI {
 				lock = false;
 			}
 		});
-		GridBagConstraints gbc_tglbtnPtt = new GridBagConstraints();
-		gbc_tglbtnPtt.insets = new Insets(0, 0, 5, 5);
-		gbc_tglbtnPtt.gridx = 2;
-		gbc_tglbtnPtt.gridy = 4;
-		panel.add(tglbtnPtt, gbc_tglbtnPtt);
+		
+		JLabel label_3 = new JLabel("");
+		panel.add(label_3);
+		
+		JPanel panel_1 = new JPanel();
+		panel.add(panel_1);
+		GridBagLayout gbl_panel_1 = new GridBagLayout();
+		gbl_panel_1.columnWidths = new int[] {10, 10, 30, 0};
+		gbl_panel_1.rowHeights = new int[]{0, 0, 0};
+		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		panel_1.setLayout(gbl_panel_1);
+		
+		JButton btnUp = new JButton("");
+		btnUp.setIcon(new ImageIcon(GUI.class.getResource("/javax/swing/plaf/metal/icons/sortUp.png")));
+		GridBagConstraints gbc_btnUp = new GridBagConstraints();
+		gbc_btnUp.anchor = GridBagConstraints.NORTHEAST;
+		gbc_btnUp.insets = new Insets(0, 0, 5, 5);
+		gbc_btnUp.gridx = 0;
+		gbc_btnUp.gridy = 0;
+		panel_1.add(btnUp, gbc_btnUp);
+		btnUp.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				lock = true;
+				  setFrequency(freqA,freqStep);
+				lock = false;
+			}
+		});
+		
+
+		
+		JButton btnDwn = new JButton("");
+		btnDwn.setIcon(new ImageIcon(GUI.class.getResource("/javax/swing/plaf/metal/icons/sortDown.png")));
+		GridBagConstraints gbc_btnDwn = new GridBagConstraints();
+		gbc_btnDwn.insets = new Insets(0, 0, 5, 0);
+		gbc_btnDwn.anchor = GridBagConstraints.NORTHEAST;
+		gbc_btnDwn.gridx = 1;
+		gbc_btnDwn.gridy = 0;
+		panel_1.add(btnDwn, gbc_btnDwn);
+		btnDwn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				lock = true;
+				setFrequency(freqA,-freqStep);
+				lock = false;
+			}
+		});;
+		
+		// set frequency step
+		JSpinner spinnerFreqStep = new JSpinner();
+		spinnerFreqStep.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				freqStep = mc2.getStepString((String) spinnerFreqStep.getValue());
+				System.out.println("Freq step now "+freqStep);
+			}
+
+		});
+		spinnerFreqStep.setModel(new SpinnerListModel(new String[] {"100 HZ", "500 HZ", "1 KHz"}));
+		GridBagConstraints gbc_spinnerFreqStep = new GridBagConstraints();
+		gbc_spinnerFreqStep.fill = GridBagConstraints.BOTH;
+		gbc_spinnerFreqStep.insets = new Insets(0, 0, 0, 5);
+		gbc_spinnerFreqStep.gridx = 2;
+		gbc_spinnerFreqStep.gridy = 0;
+		panel_1.add(spinnerFreqStep, gbc_spinnerFreqStep);
+		
+		JLabel label_4 = new JLabel("");
+		panel.add(label_4);
+		panel.add(tglbtnPtt);
 
 		JCheckBox chckbxTx = new JCheckBox("TX");
 		chckbxTx.setEnabled(false);
-
-		GridBagConstraints gbc_chckbxTx = new GridBagConstraints();
-		gbc_chckbxTx.insets = new Insets(0, 0, 5, 5);
-		gbc_chckbxTx.gridx = 3;
-		gbc_chckbxTx.gridy = 4;
-		panel.add(chckbxTx, gbc_chckbxTx);
+		panel.add(chckbxTx);
 
 		JPanel statusPanel = new JPanel();
 		statusPanel.setBorder(new TitledBorder(new LineBorder(new Color(184, 207, 229)), "Info", TitledBorder.LEADING,
 				TitledBorder.TOP, null, new Color(51, 51, 51)));
-		GridBagConstraints gbc_statusPanel = new GridBagConstraints();
-		gbc_statusPanel.fill = GridBagConstraints.BOTH;
-		gbc_statusPanel.insets = new Insets(0, 0, 0, 5);
-		gbc_statusPanel.gridx = 0;
-		gbc_statusPanel.gridy = 8;
-		panel.add(statusPanel, gbc_statusPanel);
-		GridBagLayout gbl_statusPanel = new GridBagLayout();
-		gbl_statusPanel.columnWidths = new int[] { 0, 0 };
-		gbl_statusPanel.rowHeights = new int[] { 0, 0 };
-		gbl_statusPanel.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
-		gbl_statusPanel.rowWeights = new double[] { 0.0, Double.MIN_VALUE };
-		statusPanel.setLayout(gbl_statusPanel);
+		panel.add(statusPanel);
+		statusPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
 		JLabel statusLabel = new JLabel("Status");
-		GridBagConstraints gbc_statusLabel = new GridBagConstraints();
-		gbc_statusLabel.anchor = GridBagConstraints.NORTHWEST;
-		gbc_statusLabel.gridx = 0;
-		gbc_statusLabel.gridy = 0;
-		statusPanel.add(statusLabel, gbc_statusLabel);
+		statusPanel.add(statusLabel);
+		
+		JLabel label_5 = new JLabel("");
+		panel.add(label_5);
+		
+		JLabel label_6 = new JLabel("");
+		panel.add(label_6);
+		
+		JLabel label_7 = new JLabel("");
+		panel.add(label_7);
 
 		DefaultValueDataset dataset = new DefaultValueDataset(10D);
 		JFreeChart sdial = createChart(dataset);
@@ -496,6 +524,15 @@ public class GUI {
 		});
 		timer.setRepeats(true);
 		timer.start();
+	}
+	
+	private void setFrequency(int fNow, int offset)
+	{
+		  String catString = "FA"+ Integer.toString(fNow + offset);
+		  serialPort.sendCatStringmain(catString);
+		  catString = "FB"+ Integer.toString(fNow + offset);
+		  serialPort.sendCatStringmain(catString);
+		
 	}
 
 	// define signal meter

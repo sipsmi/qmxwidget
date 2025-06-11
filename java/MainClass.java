@@ -162,6 +162,33 @@ public class MainClass {
 		}
 
 	}
+	
+	public int getStepString(String stepStr) {
+		try {
+			int retval = 500;
+			switch (stepStr) {
+			case "100 Hz":
+				retval = 100;
+				break;
+			case "500Hz":
+				retval = 500;
+				break;
+			case "1 KHz":
+				retval = 1000;
+				break;
+
+			default:
+				break;
+
+			}
+
+			return retval;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 500;
+		}
+
+	}
 
 	public int setModeInt(String sval) {
 		try {
