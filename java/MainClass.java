@@ -2,6 +2,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,6 +13,42 @@ public class MainClass {
 	private static boolean debug = true;
 	private static String myCall = "GX0XXX";
 
+	//
+	// Map UI codes to useful QMX codes
+	private static final Map<String, String> UICodeMap = new HashMap<String, String>() {
+		private static final long serialVersionUID = 1L;
+		{
+			put("preamble", "");
+			put("get_wpm", "");
+			put("postamble", ";");
+			put("ptton", "TQ1");
+			put("pttoff", "TQ0");
+
+			//  MODE
+			put( "LSB","1");
+			put( "USB",	"2");
+			put( "CW",	"3");
+			put ("FSK",	"6");
+			put( "CWR",		"7");
+			put( "FSR",		"9");
+			
+			put( "1","LSB");
+			put( "2","USB");
+			put( "3","CW");
+			put( "6","FSK");
+			put( "7","CWR");
+			put( "9","FSR");
+
+			// STEPS
+			put(" 100 Hz", "100");
+			put(" 500 Hz","500");
+			put(" 1 KHz","1000");
+			put("10 KHz","10000");
+			put("100 KHz","100000");			
+			put(" 1 MHz","1000000");
+
+		};
+	};
 	public MainClass() {
 		try {
 
@@ -128,110 +167,18 @@ public class MainClass {
 	}
 
 	public String getModeString(int ival) {
-		try {
-			String retval = "CW";
-			switch (ival) {
-			case 1:
-				retval = "LSB";
-				break;
-			case 2:
-				retval = "USB";
-				break;
-			case 3:
-				retval = "CW";
-				break;
-			case 6:
-				retval = "FSK";
-				break;
-			case 7:
-				retval = "CWR";
-				break;
-			case 9:
-				retval = "FSR";
-				break;
-
-			default:
-				break;
-
-			}
-
-			return retval;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "Error";
-		}
+		return UICodeMap.get(Integer.toString(ival));
 
 	}
 	
+
+	// get step size in HZ from the UI spinner string
 	public int getStepString(String stepStr) {
-		try {
-			int retval = 500;
-			switch (stepStr) {
-			case " 100 Hz":
-				retval = 100;
-				break;
-			case "500 Hz":
-				retval = 500;
-				break;
-			case " 1 KHz":
-				retval = 1000;
-				break;
-			case "10 KHz":
-				retval = 10000;
-				break;
-			case "100 KHz":
-				retval = 100000;
-				break;
-			case " 1 MHz":
-				retval = 1000000;
-				break;
-			default:
-				break;
-
-			}
-
-			return retval;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 500;
-		}
-
+			return getIntFromString(UICodeMap.get(stepStr));
 	}
 
 	public int setModeInt(String sval) {
-		try {
-			int retval = 1;
-			switch (sval) {
-			case "LSB":
-				retval = 1;
-				break;
-			case "USB":
-				retval = 2;
-				break;
-			case "CW":
-				retval = 3;
-				break;
-			case "FSK":
-				retval = 6;
-				break;
-			case "CWR":
-				retval = 7;
-				break;
-			case "FSR":
-				retval = 9;
-				break;
-
-			default:
-				break;
-
-			}
-
-			return retval;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 0;
-		}
-
+			return getStepString(sval);
 	}
 
 	private static void dispDebug(String $msg) {

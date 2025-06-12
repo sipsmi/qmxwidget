@@ -76,7 +76,7 @@ public class GUI {
 	private int thisMode = 3;
 	// minor and major ticks to minimise impact on CAT traffic
 	private int tickCount = 0;
-	private static int tickLimit = 5;
+	private static int tickLimit = 15;
 	private static MeterPlot plot;
 	private MeterPlot pplot;
 	private MeterPlot splot;
@@ -331,7 +331,7 @@ public class GUI {
 			}
 
 		});
-		spinnerFreqStep.setModel(new SpinnerListModel(new String[] {" 100 HZ", " 500 HZ", " 1 KHz", "10 KHz", "100 KHz", " 1 MHz"}));
+		spinnerFreqStep.setModel(new SpinnerListModel(new String[] {" 100 Hz", " 500 Hz", " 1 KHz", "10 KHz", "100 KHz", " 1 MHz"}));
 		GridBagConstraints gbc_spinnerFreqStep = new GridBagConstraints();
 		gbc_spinnerFreqStep.fill = GridBagConstraints.BOTH;
 		gbc_spinnerFreqStep.insets = new Insets(0, 0, 0, 5);
@@ -408,7 +408,7 @@ public class GUI {
 		//
 		// split into regular and not regular
 
-		Timer timer = new Timer(20, new ActionListener() {
+		Timer timer = new Timer(10, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
 
@@ -489,7 +489,7 @@ public class GUI {
 				// only go to zero if been there for a hilen (QSK PTT(
 				if (tpc < 10) {
 					pwrZCount++;
-					if (pwrZCount > 12) {
+					if (pwrZCount > 30) {
 						pwrZCount = 0;
 						pc = tpc;
 						sw = tsw;
