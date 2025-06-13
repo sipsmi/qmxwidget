@@ -1,3 +1,9 @@
+/*
+ *  G0FOZ    code (at) bockhampton.info
+ *  Copyleft
+ *  No responsibility will be taken for impact of this code on your system!
+ */
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -58,8 +64,8 @@ import javax.swing.SpringLayout;
 public class GUI {
 
 	private JFrame frmGfozIc;
-	private XmlRpcQmx qmx;// = new XmlRPCIC7000();
-	private MainClass mc2;// = new MainClass();
+	private static XmlRpcQmx qmx;// = new XmlRPCIC7000();
+	private static MainClass mc2;// = new MainClass();
 	private static QSerialPort serialPort;
 	private static RigctlClient rigctl;
 	private int sig = 0;
@@ -93,6 +99,7 @@ public class GUI {
 	/**
 	 * Launch the application.
 	 */
+	
 	public static void xmain(String[] args, XmlRpcQmx ic7000, MainClass mc, QSerialPort sPort) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -107,7 +114,7 @@ public class GUI {
 				}
 			}
 		});
-	}
+	}	 
 
 	/**
 	 * Create the application.
