@@ -61,7 +61,16 @@ import java.beans.PropertyChangeEvent;
 import java.awt.GridLayout;
 import javax.swing.SpringLayout;
 
+/**
+ * 
+ */
 public class GUI {
+	// mS for each timer fired off
+	static final int timerInterval = 25;
+	// minor and major ticks to minimise impact on CAT traffic
+	private int tickCount = 0;
+	private static int tickLimit = 10;
+	
 
 	private JFrame frmGfozIc;
 	private static XmlRpcQmx qmx;// = new XmlRPCIC7000();
@@ -80,9 +89,7 @@ public class GUI {
 	private boolean lock = false;
 	private int thisWpm = 20;
 	private int thisMode = 3;
-	// minor and major ticks to minimise impact on CAT traffic
-	private int tickCount = 0;
-	private static int tickLimit = 15;
+
 	private static MeterPlot plot;
 	private MeterPlot pplot;
 	private MeterPlot splot;
@@ -95,11 +102,18 @@ public class GUI {
 	private int tsw = 0; // variable for read swr
 	private int tpc = 0; // variable for read power
 	private int freqStep = 100;
+	
+	// Sort some GUI components for global class access
+	private DefaultValueDataset dataset = new DefaultValueDataset(10D);
+	private JLabel statusLabel;
+	private JCheckBox chckbxTx;
+	private JSpinner spinnerMode;
+	private JSlider wpm;
 
 	/**
 	 * Launch the application.
 	 */
-	
+
 	public static void xmain(String[] args, XmlRpcQmx ic7000, MainClass mc, QSerialPort sPort) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -114,7 +128,7 @@ public class GUI {
 				}
 			}
 		});
-	}	 
+	}
 
 	/**
 	 * Create the application.
@@ -159,7 +173,7 @@ public class GUI {
 		DefaultValueDataset dataset3 = new DefaultValueDataset(1D);
 		JFreeChart swrdial = createSwrChart(dataset3);
 		splot = (MeterPlot) swrdial.getPlot();
-		JSpinner spinnerMode = new JSpinner();
+		spinnerMode = new JSpinner();
 		spinnerMode.setToolTipText("Select Mode");
 		spinnerMode.setFont(new Font("Verdana", Font.PLAIN, 18));
 		spinnerMode.addChangeListener(new ChangeListener() {
@@ -182,7 +196,7 @@ public class GUI {
 		panel.add(lblLcd);
 		spinnerMode.setModel(new SpinnerListModel(new String[] { "LSB", "USB", "CW", "FSK", "CWR", "FSR" }));
 		panel.add(spinnerMode);
-		
+
 		JLabel label = new JLabel("");
 		panel.add(label);
 
@@ -196,9 +210,8 @@ public class GUI {
 		JLabel lblVfoa = new JLabel("VFOA");
 		panel.add(lblVfoa);
 
-		// null
-		// mc2.toString();
-
+		// Button to send CQ
+		// -----------------------------------------------------------------------------------------
 		JButton btnSendCq = new JButton("send CQ");
 		btnSendCq.addActionListener(new ActionListener() {
 			@Override
@@ -207,10 +220,10 @@ public class GUI {
 				System.out.println("Send M1");
 			}
 		});
-		
+
 		JButton buttonVfoA = new JButton("VFO A");
 		panel.add(buttonVfoA);
-		
+
 		JLabel label_1 = new JLabel("");
 		panel.add(label_1);
 
@@ -225,7 +238,7 @@ public class GUI {
 		lblVfob.setHorizontalAlignment(SwingConstants.CENTER);
 		panel.add(lblVfob);
 
-		JSlider wpm = new JSlider();
+		wpm = new JSlider();
 		wpm.addChangeListener(new ChangeListener() {
 
 			@Override
@@ -235,7 +248,7 @@ public class GUI {
 				if (!wpm.getValueIsAdjusting()) {
 					int value = wpm.getValue();
 					if (qmx != null) {
-						serialPort.sendCatStringmain("KS" + value); 
+						serialPort.sendCatStringmain("KS" + value);
 						qmx.dispDebug("WPM" + value);
 					}
 					lock = false;
@@ -243,10 +256,10 @@ public class GUI {
 			}
 
 		});
-		
+
 		JButton buttonVfoB = new JButton("VFO B");
 		panel.add(buttonVfoB);
-		
+
 		JLabel label_2 = new JLabel("");
 		panel.add(label_2);
 		wpm.setMajorTickSpacing(5);
@@ -276,22 +289,25 @@ public class GUI {
 				lock = false;
 			}
 		});
-		
+
 		JLabel label_3 = new JLabel("");
 		panel.add(label_3);
-		
+
+		// sub-panel for the frequency buttons
 		JPanel panel_1 = new JPanel();
 		panel.add(panel_1);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[] {10, 10, 50, 0};
-		gbl_panel_1.rowHeights = new int[]{0, 0, 0};
-		gbl_panel_1.columnWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.columnWidths = new int[] { 10, 10, 50, 0 };
+		gbl_panel_1.rowHeights = new int[] { 0, 0, 0 };
+		gbl_panel_1.columnWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_panel_1.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
 		panel_1.setLayout(gbl_panel_1);
-		
+
+		// frequency up
+		// -------------------------------------------------------------------------
 		JButton btnUp = new JButton("");
 		ImageIcon upIcon = (ImageIcon) UIManager.getIcon("Table.ascendingSortIcon");
-		btnUp.setIcon( upIcon);
+		btnUp.setIcon(upIcon);
 
 		GridBagConstraints gbc_btnUp = new GridBagConstraints();
 		gbc_btnUp.anchor = GridBagConstraints.NORTHEAST;
@@ -303,16 +319,16 @@ public class GUI {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				lock = true;
-				  setFrequency(freqA,freqStep);
+				setFrequency(freqA, freqStep);
 				lock = false;
 			}
 		});
-		
 
-		
+		// frequency down
+		// -------------------------------------------------------------------------
 		JButton btnDwn = new JButton("");
 		ImageIcon downIcon = (ImageIcon) UIManager.getIcon("Table.descendingSortIcon");
-		btnDwn.setIcon( downIcon);
+		btnDwn.setIcon(downIcon);
 		GridBagConstraints gbc_btnDwn = new GridBagConstraints();
 		gbc_btnDwn.insets = new Insets(0, 0, 5, 0);
 		gbc_btnDwn.anchor = GridBagConstraints.NORTHEAST;
@@ -323,34 +339,36 @@ public class GUI {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				lock = true;
-				setFrequency(freqA,-freqStep);
+				setFrequency(freqA, -freqStep);
 				lock = false;
 			}
-		});;
-		
+		});
+		;
+
 		// set frequency step
 		JSpinner spinnerFreqStep = new JSpinner();
 		spinnerFreqStep.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				freqStep = mc2.getStepString((String) spinnerFreqStep.getValue());
-				System.out.println("Freq step now "+freqStep);
+				System.out.println("Freq step now " + freqStep);
 			}
 
 		});
-		spinnerFreqStep.setModel(new SpinnerListModel(new String[] {" 100 Hz", " 500 Hz", " 1 KHz", "10 KHz", "100 KHz", " 1 MHz"}));
+		spinnerFreqStep.setModel(
+				new SpinnerListModel(new String[] { " 100 Hz", " 500 Hz", " 1 KHz", "10 KHz", "100 KHz", " 1 MHz" }));
 		GridBagConstraints gbc_spinnerFreqStep = new GridBagConstraints();
 		gbc_spinnerFreqStep.fill = GridBagConstraints.BOTH;
 		gbc_spinnerFreqStep.insets = new Insets(0, 0, 0, 5);
 		gbc_spinnerFreqStep.gridx = 2;
 		gbc_spinnerFreqStep.gridy = 0;
 		panel_1.add(spinnerFreqStep, gbc_spinnerFreqStep);
-		
+
 		JLabel label_4 = new JLabel("");
 		panel.add(label_4);
 		panel.add(tglbtnPtt);
 
-		JCheckBox chckbxTx = new JCheckBox("TX");
+		chckbxTx = new JCheckBox("TX");
 		chckbxTx.setEnabled(false);
 		panel.add(chckbxTx);
 
@@ -360,19 +378,19 @@ public class GUI {
 		panel.add(statusPanel);
 		statusPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
-		JLabel statusLabel = new JLabel("Status");
+		statusLabel = new JLabel("Status");
 		statusPanel.add(statusLabel);
-		
+
 		JLabel label_5 = new JLabel("");
 		panel.add(label_5);
-		
+
 		JLabel label_6 = new JLabel("");
 		panel.add(label_6);
-		
+
 		JLabel label_7 = new JLabel("");
 		panel.add(label_7);
 
-		DefaultValueDataset dataset = new DefaultValueDataset(10D);
+		// DefaultValueDataset dataset = new DefaultValueDataset(10D);
 		JFreeChart sdial = createChart(dataset);
 		plot = (MeterPlot) sdial.getPlot();
 		GridBagConstraints gbc_dial = new GridBagConstraints();
@@ -415,74 +433,11 @@ public class GUI {
 		//
 		// split into regular and not regular
 
-		Timer timer = new Timer(10, new ActionListener() {
+		Timer timer = new Timer(timerInterval, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
-
-				// process reponse queue here
-				while (serialPort.sizeResponse() > 0) {
-					responseString = serialPort.fetchAndRemoveResponse();
-					if (responseString == null || responseString.charAt(0) == '?' || responseString.length() < 2) {
-						// System.out.println("INvalid reponse received: "+responseString );
-						continue;
-					} else if (responseString.charAt(2) == ';') {
-						// System.out.println("Confirmation reponse received: "+responseString );
-						continue;
-					}
-					String sc = responseString.substring(0, 2);
-					//System.out.println("Process reponse(" + sc + "): " + responseString);
-					switch (sc) {
-					case "SM":
-						sig = mc2.getIntFromString(responseString);
-						dataset.setValue(sig);
-						plot.setDataset(dataset);
-						break;
-					case "FA":
-						freqA = mc2.getIntFromString(responseString);
-						txtVfoa.setText(mc2.getHumanFreqString(freqA));
-						break;
-					case "FB":
-						freqB = mc2.getIntFromString(responseString);
-						txtVfob.setText(mc2.getHumanFreqString(freqB));
-						break;
-					case "PC":
-						tpc = mc2.getIntFromString(responseString);
-						break;
-					case "SW":
-						tsw = mc2.getIntFromString(responseString);
-						break;
-					case "LC":
-						lcdText.setText(responseString.replaceAll("(LC|;)", ""));
-						break;
-					case "IF":
-						statusLabel.setText(responseString);
-						break;
-					// agc = mc2.getIntFromString(serialPort.sendCatStringmain("SA"));
-					// int tpc = mc2.getIntFromString(serialPort.sendCatStringmain("PC"));
-					// int tsw = mc2.getIntFromString(serialPort.sendCatStringmain("SW"));
-					case "TQ":
-						// TX state
-						isTx = (mc2.getIntFromString(responseString) > 0) ? true : false;
-						chckbxTx.setSelected(isTx);
-						break;
-					case "MD":
-						// currentn mode
-						thisMode = mc2.getIntFromString(responseString);
-						spinnerMode.setValue(mc2.getModeString(thisMode));
-						break;
-					case "KS":
-						// current WPM
-						if (!lock) {
-							thisWpm = mc2.getIntFromString(responseString);
-							wpm.setValue(thisWpm);
-						}
-						break;
-
-					default:
-						System.out.println("Process reponse not supported (" + sc + "): " + responseString);
-					}
-
-				}
+				// sort any messages waiting
+				processMessageQueue();
 
 				// section for fast queries
 				tickCount++;
@@ -515,9 +470,8 @@ public class GUI {
 					oldVal1 = (pc + sw);
 				}
 
-				if (tickCount > tickLimit) // only so often
+				if (tickCount > tickLimit) // only so often do these 
 				{
-
 					tickCount = 0; // reset
 					serialPort.sendCatStringmain("IF");
 					serialPort.sendCatStringmain("TQ");
@@ -532,24 +486,30 @@ public class GUI {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-
 				}
 			}
 		});
 		timer.setRepeats(true);
 		timer.start();
 	}
-	
-	private void setFrequency(int fNow, int offset)
-	{
-		  String catString = "FA"+ Integer.toString(fNow + offset);
-		  serialPort.sendCatStringmain(catString);
-		  catString = "FB"+ Integer.toString(fNow + offset);
-		  serialPort.sendCatStringmain(catString);
-		
+
+	/**
+	 * @param fNow
+	 * @param offset
+	 */
+	private void setFrequency(int fNow, int offset) {
+		String catString = "FA" + Integer.toString(fNow + offset);
+		serialPort.sendCatStringmain(catString);
+		catString = "FB" + Integer.toString(fNow + offset);
+		serialPort.sendCatStringmain(catString);
+
 	}
 
 	// define signal meter
+	/**
+	 * @param dataset
+	 * @return
+	 */
 	private static JFreeChart createChart(ValueDataset dataset) {
 		MeterPlot plot = new MeterPlot(dataset);
 		plot.addInterval(new MeterInterval("All", new Range(0.0, 100.0)));
@@ -571,6 +531,10 @@ public class GUI {
 	}
 
 	// define power meter
+	/**
+	 * @param dataset
+	 * @return
+	 */
 	private static JFreeChart createPwrChart(ValueDataset dataset) {
 		MeterPlot pplot = new MeterPlot(dataset);
 		pplot.addInterval(new MeterInterval("All", new Range(5.0, 6.0)));
@@ -592,6 +556,10 @@ public class GUI {
 	}
 
 	// define swr meter
+	/**
+	 * @param dataset
+	 * @return
+	 */
 	private static JFreeChart createSwrChart(ValueDataset dataset) {
 		MeterPlot splot = new MeterPlot(dataset);
 		// splot.addInterval(new MeterInterval("All", new Range(5.0, 6.0)));
@@ -611,4 +579,74 @@ public class GUI {
 		JFreeChart chart = new JFreeChart("SWR", JFreeChart.DEFAULT_TITLE_FONT, splot, false);
 		return chart;
 	}
+
+	/**
+	 * 
+	 */
+	private void processMessageQueue() {
+		// process reponse queue here
+		// could do this in seperate function
+		while (serialPort.sizeResponse() > 0) {
+			responseString = serialPort.fetchAndRemoveResponse();
+			if (responseString == null || responseString.charAt(0) == '?' || responseString.length() < 2) {
+				// System.out.println("INvalid reponse received: "+responseString );
+				continue;
+			} else if (responseString.charAt(2) == ';') {
+				// System.out.println("Confirmation reponse received: "+responseString );
+				continue;
+			}
+			String sc = responseString.substring(0, 2);
+			// System.out.println("Process reponse(" + sc + "): " + responseString);
+			switch (sc) {
+			case "SM": // Signal Meter
+				sig = mc2.getIntFromString(responseString);
+				dataset.setValue(sig);
+				plot.setDataset(dataset);
+				break;
+			case "FA": // VFO A
+				freqA = mc2.getIntFromString(responseString);
+				txtVfoa.setText(mc2.getHumanFreqString(freqA));
+				break;
+			case "FB": // CFO B
+				freqB = mc2.getIntFromString(responseString);
+				txtVfob.setText(mc2.getHumanFreqString(freqB));
+				break;
+			case "PC": // Power Meter
+				tpc = mc2.getIntFromString(responseString);
+				break;
+			case "SW": // SWR Meter
+				tsw = mc2.getIntFromString(responseString);
+				break;
+			case "LC": // LCD Screen contents
+				lcdText.setText(responseString.replaceAll("(LC|;)", ""));
+				break;
+			case "IF": // TS480 Information String
+				statusLabel.setText(responseString);
+				break;
+			// agc = mc2.getIntFromString(serialPort.sendCatStringmain("SA"));
+			// int tpc = mc2.getIntFromString(serialPort.sendCatStringmain("PC"));
+			// int tsw = mc2.getIntFromString(serialPort.sendCatStringmain("SW"));
+			case "TQ": // Transmit states
+				// TX state
+				isTx = (mc2.getIntFromString(responseString) > 0) ? true : false;
+				chckbxTx.setSelected(isTx);
+				break;
+			case "MD": // currentn mode
+				thisMode = mc2.getIntFromString(responseString);
+				spinnerMode.setValue(mc2.getModeString(thisMode));
+				break;
+			case "KS": // current WPM
+				if (!lock) {
+					thisWpm = mc2.getIntFromString(responseString);
+					wpm.setValue(thisWpm);
+				}
+				break;
+
+			default:
+				System.out.println("Process reponse not supported (" + sc + "): " + responseString);
+			}
+
+		}
+	}
+
 }
