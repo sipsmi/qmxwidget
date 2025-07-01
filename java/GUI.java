@@ -89,6 +89,7 @@ public class GUI {
 	private boolean lock = false;
 	private int thisWpm = 20;
 	private int thisMode = 3;
+	private CircularStringBuffer cwBuffer;
 
 	private static MeterPlot plot;
 	private MeterPlot pplot;
@@ -121,7 +122,7 @@ public class GUI {
 				try {
 					GUI window = new GUI(ic7000, mc, sPort);
 					window.frmGfozIc.setVisible(true);
-					GUI.rigctl = new RigctlClient("localhost", 4532);
+					GUI.rigctl = new RigctlClient();
 					GUI.serialPort = sPort;
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -138,6 +139,8 @@ public class GUI {
 		qmx = ic7000;
 		mc2 = mc;
 		serialPort = sPort;
+		cwBuffer = new CircularStringBuffer(72);
+		cwBuffer.add("                                ");
 	}
 
 	/**
@@ -473,7 +476,7 @@ public class GUI {
 				if (tickCount > tickLimit) // only so often do these 
 				{
 					tickCount = 0; // reset
-					serialPort.sendCatStringmain("IF");
+					//serialPort.sendCatStringmain("IF");
 					serialPort.sendCatStringmain("TQ");
 					serialPort.sendCatStringmain("MD");
 					serialPort.sendCatStringmain("KS");
@@ -481,6 +484,7 @@ public class GUI {
 					// display the VFO contents
 					serialPort.sendCatStringmain("FA");
 					serialPort.sendCatStringmain("FB");
+					serialPort.sendCatStringmain("TB");
 					try {
 						rigctl.sendFrequency((long) freqA - offset);
 					} catch (IOException e) {
@@ -634,6 +638,11 @@ public class GUI {
 			case "MD": // currentn mode
 				thisMode = mc2.getIntFromString(responseString);
 				spinnerMode.setValue(mc2.getModeString(thisMode));
+				break;
+			case "TB": // cw receiver buffer
+				cwBuffer.add(  mc2.getCWTextFromTB(responseString) );
+				statusLabel.setText( cwBuffer.toString() );
+				
 				break;
 			case "KS": // current WPM
 				if (!lock) {

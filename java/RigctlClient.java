@@ -37,6 +37,10 @@ public class RigctlClient {
     // Indicates the communication state with the server
     private static boolean commsIsOpen = false;
 
+
+	private static String serverHost = "localhost";
+    private static int serverPort = 4532;
+
     /*
      * Constructor for RigctlClient.
      * Initializes the socket connection to the specified server host and port.
@@ -44,7 +48,27 @@ public class RigctlClient {
      *         serverPort (int) - the port number for the connection.
      * Outputs: Initializes communication if successful, otherwise logs an error message.
      */
-    public RigctlClient(String serverHost, int serverPort) {
+    public RigctlClient(String tserverHost, int tserverPort) {
+        super();
+        try {
+            // Establish a socket connection to the specified server and port
+            RigctlClient.socket = new Socket(tserverHost, tserverPort);
+            // Initialize the writer to send ASCII commands to the server
+            RigctlClient.writer = new BufferedWriter(
+                new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.US_ASCII)
+            );
+            // Initialize the reader to receive ASCII responses from the server
+            RigctlClient.reader = new BufferedReader(
+                new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII)
+            );
+            // Mark communications as open after successful connection
+            commsIsOpen = true;
+        } catch (IOException e) {
+            // Log the error if the communication fails during initialization
+            System.err.println("Error communicating with rigctld: " + e.getMessage());
+        }
+    }
+    public RigctlClient() {
         super();
         try {
             // Establish a socket connection to the specified server and port
@@ -93,6 +117,19 @@ public class RigctlClient {
             }
         }
     }
+    
+    public static String getServerHost() {
+		return serverHost;
+	}
+	public static void setServerHost(String serverHost) {
+		RigctlClient.serverHost = serverHost;
+	}
+	public static int getServerPort() {
+		return serverPort;
+	}
+	public static void setServerPort(int serverPort) {
+		RigctlClient.serverPort = serverPort;
+	}
     
     // IMPROVEMENT: Consider implementing a cleanup method to properly close the socket and streams
     // to avoid resource leaks. This should be called during object destruction or when closing communication. 
