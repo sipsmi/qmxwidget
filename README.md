@@ -5,7 +5,7 @@
 This little widget exploits the latest QMX CAT codes ( LCD read, power, swr ) to give PC control and visualisation.
 It previously used FLRIG XMLRPC but now connects directly to the QMX.
 
-The code has been modfied to send frequency data to SDR++ program via its rigctld emulation server; should an SDR++ instance not be runnign ( or not have the rigctld running it quietly ignores it)    This therefore adds a bandscope to the QMX.  If this is enabled it sends commands to the QMX to ensure audio card is in I/Q mode.  Instructions to configure SDR++ to follow\...
+The code has been modfied to send frequency data to SDR++ program via its rigctld emulation server; should an SDR++ instance not be runnign ( or not have the rigctld running it quietly ignores it)    This therefore adds a bandscope to the QMX.  If this is enabled it sends commands to the QMX to ensure audio card is in I/Q mode.  
 
 ![1.00](arch2.png)
 
@@ -16,8 +16,14 @@ It may be run from a single composite JAR file but requires a configuration file
 ```
 java -jar qmx.jar   config.json 
 ```
+See the release assets for these files.  *do* edit the JSON configuration file before you run it.
 
-Remember to change the parameters to suit!
+
+Note:  If you want to use the band scope then download sdr++ and have this running first and ensure that:
+(1) SDR++ is running with sound card ( audio ) input connected to the QMX presented sound card.
+(2) SDR++ RigCTL server is running and the address/port match that in the configuration file.
+see [SDR++ manual](https://www.sdrpp.org/manual.pdf)
+
 
 ## Configuration
 
@@ -37,8 +43,6 @@ Configuration parameters
 | Parameter          | Example value | Description                                                                                               |
 | :----------------- | :------------ | :-------------------------------------------------------------------------------------------------------- |
 | Callsign           | G0FOZ         | Your callsign - will be used for the CQ button and other macros.                                          |
-| XMLRPCaddress      | localhost     | Deprecated. The IP address or name of the FLRig instance RPC server.  Other examples 127.0.0.1   myflrig.mydomain.com |
-| XMLRPCport         | 12345         | Dep[recated. IP port number of the FLRIg instance - defaults to 12345                                                  |
 | rigctldAddress     | localhost     | SDR bandscope display frequency data                                                                      |
 | rigctldPort        | 4532          | Port for frequency control of bandscope                                                                   |
 | qmxDevice          | COM3          | The USB/Serial interface, will be COMx on windows, various /dev/.... on Linux/MAX | 
