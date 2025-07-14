@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List; 
 
 public class QSerialPort {
-    private static String portName = "/dev/QMX07"; // Port name for communication
+    private static String portName = "/dev/QMX00"; // Port name for communication
     private static SerialPort[] ports; // Array of available serial ports
     private static SerialPort serialPort; // Single serial port used for communication
     private static OutputStream output; // Output stream for sending data

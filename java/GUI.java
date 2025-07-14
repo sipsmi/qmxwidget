@@ -139,8 +139,8 @@ public class GUI {
 		qmx = ic7000;
 		mc2 = mc;
 		serialPort = sPort;
-		cwBuffer = new CircularStringBuffer(72);
-		cwBuffer.add("                                ");
+		cwBuffer = new CircularStringBuffer(100);
+		cwBuffer.add("                                                                           ");
 	}
 
 	/**

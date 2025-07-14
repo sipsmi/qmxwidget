@@ -313,6 +313,10 @@ public class MainClass {
 		return String.format("%#11.6f MHz", f); // Format the frequency as a string
 	}
 
+	/**
+	 * @param responseString
+	 * @return
+	**/
 	public String getCWTextFromTB(String responseString) {
 		// TODO Auto-generated method stub
 		if (responseString.length() < 6)
@@ -323,6 +327,13 @@ public class MainClass {
 
 	}
 
+	/**
+	 * Extract a subsctring from a string
+	 * @param input   =input string
+	 * @param startPos  = integer start position 0...
+	 * @param endChar = delimiter at end of string
+	 * @return
+	 */
 	public static String extractSubstring(String input, int startPos, char endChar) {
 		// Validate input parameters
 		if (input == null || input.isEmpty()) {
