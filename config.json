@@ -2,5 +2,5 @@
 	"Callsign": "G0FOZ",
     "rigctldAddress": "localhost",
     "rigctldPort": 4532,
-    "qmxDevice":  "/dev/QMX09"
+    "qmxDevice":  "/dev/QMX07"
 }

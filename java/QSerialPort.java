@@ -59,7 +59,14 @@ public class QSerialPort {
      * Constructor for QSerialPort class 
      * Initializes the serial port, sets parameters, and establishes a data listener.
      */
-    public QSerialPort() {
+    public QSerialPort(String portNameIn ) {
+    	portName = portNameIn;
+    	commonQSerialPort();
+    }
+    public QSerialPort( ) {
+    	commonQSerialPort();
+    }
+    private void  commonQSerialPort() {
         System.out.println("Available Serial Ports (look for QMX):");
         // IMPROVEMENT: Consider uncommenting port listing for debugging
         // ports = SerialPort.getCommPorts();

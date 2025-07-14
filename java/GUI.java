@@ -71,7 +71,6 @@ public class GUI {
 	private int tickCount = 0;
 	private static int tickLimit = 10;
 	
-
 	private JFrame frmGfozIc;
 	private static XmlRpcQmx qmx;// = new XmlRPCIC7000();
 	private static MainClass mc2;// = new MainClass();

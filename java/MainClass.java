@@ -32,7 +32,8 @@ import org.json.JSONObject; // Importing JSONObject class for JSON operations
 public class MainClass {
 
 	private static boolean debug = true; // Debugging flag to control debug message output
-	private static String myCall = "GX0XXX"; // Default call sign
+	private static String myCall = "GX0XXX"; // Default call 
+	private static String jsonSerialPort="";
 
 	// Map UI codes to useful QMX codes
 	private static final Map<String, String> UICodeMap = new HashMap<String, String>() {
@@ -97,7 +98,7 @@ public class MainClass {
 		try {
 			// Initiating the base classes for processing QMX and serial port communication
 			XmlRpcQmx qmx = new XmlRpcQmx();
-			QSerialPort serialPort = new QSerialPort();
+
 
 			JSONObject jsonObj = null; // Initialize JSON object for configurations
 			int argc = args.length; // Capture the number of command-line arguments
@@ -127,6 +128,7 @@ public class MainClass {
 							: RigctlClient.getServerHost());
 					RigctlClient.setServerPort(
 							jsonObj.has("rigctldPort") ? jsonObj.getInt("rigctldPort") : RigctlClient.getServerPort());
+					jsonSerialPort = jsonObj.has("qmxDevice") ? jsonObj.getString("qmxDevice") : QSerialPort.getPortName() ;
 
 					qmx.init(); // Initialize QMX with provided parameters
 				} catch (JSONException err) {
@@ -141,6 +143,7 @@ public class MainClass {
 
 			// MainClass mc = new MainClass(); // Instantiate the main class
 			MainClass.setMyCall(myCall); // Set the callsign for processing
+			QSerialPort serialPort = new QSerialPort(jsonSerialPort);
 			// Initiate GUI elements
 			GUI.xmain(args, qmx, new MainClass(), serialPort); // Initialize GUI with provided parameters
 

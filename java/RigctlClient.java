@@ -50,6 +50,8 @@ public class RigctlClient {
      */
     public RigctlClient(String tserverHost, int tserverPort) {
         super();
+        serverHost = tserverHost;
+        serverPort = tserverPort;
         try {
             // Establish a socket connection to the specified server and port
             RigctlClient.socket = new Socket(tserverHost, tserverPort);
