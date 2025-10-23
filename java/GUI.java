@@ -33,9 +33,9 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.plaf.basic.BasicIconFactory;
-import javax.swing.plaf.metal.MetalIconFactory;
-import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
+//import javax.swing.plaf.basic.BasicIconFactory;
+//import javax.swing.plaf.metal.MetalIconFactory;
+//import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -46,20 +46,20 @@ import org.jfree.data.Range;
 import org.jfree.data.general.DefaultValueDataset;
 import org.jfree.data.general.ValueDataset;
 
-import com.fazecast.jSerialComm.SerialPort;
-import com.fazecast.jSerialComm.SerialPortDataListener;
-import com.fazecast.jSerialComm.SerialPortEvent;
+//import com.fazecast.jSerialComm.SerialPort;
+//import com.fazecast.jSerialComm.SerialPortDataListener;
+//import com.fazecast.jSerialComm.SerialPortEvent;
 
 import javax.swing.BoxLayout;
 import java.awt.Font;
 import javax.swing.SwingConstants;
-import java.awt.Button;
+//import java.awt.Button;
 import javax.swing.ImageIcon;
 import java.awt.FlowLayout;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-import java.awt.GridLayout;
-import javax.swing.SpringLayout;
+//import java.beans.PropertyChangeListener;
+//import java.beans.PropertyChangeEvent;
+//import java.awt.GridLayout;
+//import javax.swing.SpringLayout;
 
 /**
  * 
