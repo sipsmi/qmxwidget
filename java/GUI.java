@@ -5,6 +5,7 @@
  */
 
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
@@ -93,6 +94,7 @@ public class GUI {
 	private static MeterPlot plot;
 	private MeterPlot pplot;
 	private MeterPlot splot;
+	private SMeter smeter;
 	private int pwrZCount = 0;
 	private int freqA = 0;
 	private int freqB = 0;
@@ -158,10 +160,10 @@ public class GUI {
 		c2.anchor = GridBagConstraints.FIRST_LINE_START;
 
 		JPanel meter_panel = new JPanel();
-		meter_panel.setBounds(0, 0, 750, 100);
+		meter_panel.setBounds(0, 0, 600, 200);
 		frmGfozIc.getContentPane().add(meter_panel, c);
 		JPanel panel = new JPanel();
-		panel.setBounds(0, 105, 750, 350);
+		panel.setBounds(0, 205, 600, 405);
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 
 		frmGfozIc.getContentPane().add(panel, c2);
@@ -401,33 +403,44 @@ public class GUI {
 		gbc_dial.gridx = 0;
 		gbc_dial.gridy = 0;
 
-		ChartPanel chartpanel = new ChartPanel(sdial);
-		chartpanel.setBounds(0, 0, 250, 100);
-		chartpanel.setFillZoomRectangle(false);
-		chartpanel.setEnforceFileExtensions(false);
+		//ChartPanel chartpanel = new ChartPanel(sdial);
+		//chartpanel.setBounds(0, 0, 250, 100);
+		//chartpanel.setFillZoomRectangle(false);
+		//chartpanel.setEnforceFileExtensions(false);
 		// chartpanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null,
 		// null));
-		chartpanel.setMaximumDrawWidth(250);
-		chartpanel.setMaximumDrawHeight(100);
-		chartpanel.setLayout(new BoxLayout(chartpanel, BoxLayout.X_AXIS));
+		//chartpanel.setMaximumDrawWidth(300);
+		//chartpanel.setMaximumDrawHeight(100);
+		//chartpanel.setLayout(new BoxLayout(chartpanel, BoxLayout.X_AXIS));
+				// temp 
+		smeter = new SMeter();
+		smeter.setLayout(null);
+		smeter.setBounds(0, 0, 300, 200);
+		//smeter.setSize(300, 100);
+		smeter.setLayout(new BoxLayout(smeter, BoxLayout.X_AXIS));
 
 		ChartPanel swrchartpanel = new ChartPanel(swrdial);
-		swrchartpanel.setBounds(250, 0, 250, 100);
+		swrchartpanel.setBounds(300, 0, 300, 100);
 		swrchartpanel.setDomainZoomable(false);
 		swrchartpanel.setBorder(null);
-		swrchartpanel.setMaximumDrawWidth(250);
+		swrchartpanel.setMaximumDrawWidth(300);
 		swrchartpanel.setMaximumDrawHeight(100);
 		swrchartpanel.setLayout(null);
 
 		ChartPanel pchartpanel = new ChartPanel(pdial);
-		pchartpanel.setBounds(500, 0, 250, 100);
+		pchartpanel.setBounds(300,100, 300, 100);
 		pchartpanel.setDomainZoomable(false);
 		pchartpanel.setBorder(null);
-		pchartpanel.setMaximumDrawWidth(250);
+		pchartpanel.setMaximumDrawWidth(300);
 		pchartpanel.setMaximumDrawHeight(100);
 		pchartpanel.setLayout(null);
 		meter_panel.setLayout(null);
-		meter_panel.add(chartpanel);
+		
+		
+
+		//meter_panel.add(chartpanel);
+		meter_panel.add(smeter);
+		//smeter.setVisible(true);
 		meter_panel.add(swrchartpanel);
 		meter_panel.add(pchartpanel);
 
@@ -493,6 +506,7 @@ public class GUI {
 			}
 		});
 		timer.setRepeats(true);
+		smeter.setValue(5.01);
 		timer.start();
 	}
 
@@ -582,7 +596,31 @@ public class GUI {
 		JFreeChart chart = new JFreeChart("SWR", JFreeChart.DEFAULT_TITLE_FONT, splot, false);
 		return chart;
 	}
+	
+	
 
+	
+	/**
+	 * Converts a dB signal to a linear scale of 0.0 to 15.0.
+	 * * @param dbValue    The input signal in dB.
+	 * @param minDb      The floor value (maps to 0.0). E.g., -100.0
+	 * @param maxDb      The ceiling value (maps to 15.0). E.g., 0.0
+	 * @return           A linear value between 0.0 and 15.0.
+	 */
+	public static float convertDbToLinearScale(int dbValue) {
+	    // 1. Clamp the input to ensure it stays within our defined range
+	    int clampedDb =  Math.min( 80, dbValue);
+
+	    // 2. Convert dB to a standard linear power ratio: P = 10^(db/10)
+	    // However, for a simple 0-15 UI scale, we normalize the dB range first.
+	    float normalized = (float) ( (clampedDb+0.001)  / 80.0);
+
+	    // 3. Scale to the target range (15.0)
+	    float linearScale = (float) (normalized * 15.0);
+
+	    return linearScale;
+	}
+	
 	/**
 	 * 
 	 */
@@ -605,6 +643,8 @@ public class GUI {
 				sig = mc2.getIntFromString(responseString);
 				dataset.setValue(sig);
 				plot.setDataset(dataset);
+				
+				smeter.setValue(convertDbToLinearScale(sig));
 				break;
 			case "FA": // VFO A
 				freqA = mc2.getIntFromString(responseString);
