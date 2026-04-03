@@ -1,5 +1,5 @@
 {
-	"Callsign": "G0FOZ",
+	"Callsign": "GE2XXX",
     "rigctldAddress": "localhost",
     "rigctldPort": 4532,
     "qmxDevice":  "/dev/QMX07"

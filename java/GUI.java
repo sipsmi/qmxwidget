@@ -98,7 +98,7 @@ public class GUI {
 	private int pwrZCount = 0;
 	private int freqA = 0;
 	private int freqB = 0;
-	private long offset = 12000;
+	private long offset = 12700;
 	private String responseString = null;
 	String sCommand = "";
 	private int tsw = 0; // variable for read swr
