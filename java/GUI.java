@@ -609,11 +609,12 @@ public class GUI {
 	 */
 	public static float convertDbToLinearScale(int dbValue) {
 	    // 1. Clamp the input to ensure it stays within our defined range
-	    int clampedDb =  Math.min( 80, dbValue);
+		final int  meterRng = 108;
+	    int clampedDb =  Math.min( meterRng, dbValue);
 
 	    // 2. Convert dB to a standard linear power ratio: P = 10^(db/10)
 	    // However, for a simple 0-15 UI scale, we normalize the dB range first.
-	    float normalized = (float) ( (clampedDb+0.001)  / 80.0);
+	    float normalized = (float) ( (clampedDb+0.001)  / (meterRng+0.001));
 
 	    // 3. Scale to the target range (15.0)
 	    float linearScale = (float) (normalized * 15.0);
