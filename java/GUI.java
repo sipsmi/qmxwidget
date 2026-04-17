@@ -150,7 +150,7 @@ public class GUI {
 	private void initialize() {
 		frmGfozIc = new JFrame();
 		frmGfozIc.setTitle("G0FOZ - QMX Controller");
-		frmGfozIc.setBounds(0, 0, 750, 350);
+		frmGfozIc.setBounds(0, 0, 750, 850);
 		frmGfozIc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmGfozIc.getContentPane().setLayout(null);
 
@@ -163,7 +163,7 @@ public class GUI {
 		meter_panel.setBounds(0, 0, 600, 200);
 		frmGfozIc.getContentPane().add(meter_panel, c);
 		JPanel panel = new JPanel();
-		panel.setBounds(0, 205, 600, 405);
+		panel.setBounds(0, 205, 600, 805);
 		panel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 
 		frmGfozIc.getContentPane().add(panel, c2);
@@ -443,6 +443,13 @@ public class GUI {
 		//smeter.setVisible(true);
 		meter_panel.add(swrchartpanel);
 		meter_panel.add(pchartpanel);
+		
+		
+		
+		//bandscope
+       QMXBandscope scope = new QMXBandscope();
+            panel.add(scope);
+            new Thread(scope::startCapture).start();
 
 		// set up the timer
 		//
