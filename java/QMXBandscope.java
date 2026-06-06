@@ -2,65 +2,141 @@ import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt; // Added for fast pixel shifting
+import java.awt.image.DataBufferInt;
 import org.jtransforms.fft.DoubleFFT_1D;
 
+/**
+ * QMXBandscope is a Java Swing panel that captures stereo audio (I/Q signals),
+ * performs a Fast Fourier Transform (FFT), and renders a real-time spectrum analyzer 
+ * and waterfall display. 
+ */
 public class QMXBandscope extends JPanel {
 
+    private static final long serialVersionUID = 1645222813962590763L;
+    // --- DSP Constants ---
     private static final int SAMPLE_RATE = 48000;
     private static final int FFT_SIZE = 2048; 
     
+    // --- Data Buffers ---
     private double[] magnitudesDb = new double[FFT_SIZE];
     private BufferedImage waterfallImage;
-    private int[] waterfallPixels; // Direct access to the image's pixels
+    private int[] waterfallPixels; 
     
+    // --- Dynamic Level Controls (Volatile for Thread Safety) ---
+    private volatile double minDbLevel = -100.0;
+    private volatile double maxDbLevel = -10.0;
+    private volatile int spectrumOffset = 100;
+
+    // --- UI Components ---
+    private ScopeDisplay display;
+
     public QMXBandscope() {
-        setPreferredSize(new Dimension(1024, 600)); 
-        setBackground(Color.BLACK);
-        
-        // Initialize the image
+        setLayout(new BorderLayout());
+        setBackground(Color.DARK_GRAY);
+
+        // 1. Initialize data buffers
         waterfallImage = new BufferedImage(FFT_SIZE, 300, BufferedImage.TYPE_INT_RGB);
-        
-        // Grab the raw pixel array backing the image for ultra-fast, bug-free shifting
         waterfallPixels = ((DataBufferInt) waterfallImage.getRaster().getDataBuffer()).getData();
+
+        // 2. Setup the control panel with sliders FIRST (at the top)
+        JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new GridLayout(1, 3, 10, 0));
+        controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Slider: Waterfall Noise Floor (Min dB)
+        JSlider minSlider = createSlider("Waterfall Min (Noise Floor)", -150, -50, (int)minDbLevel);
+        minSlider.addChangeListener(e -> minDbLevel = minSlider.getValue());
+        
+        // Slider: Waterfall Peak (Max dB)
+        JSlider maxSlider = createSlider("Waterfall Max (Peak)", -80, 20, (int)maxDbLevel);
+        maxSlider.addChangeListener(e -> maxDbLevel = maxSlider.getValue());
+
+        // Slider: Spectrum Line Graph Y-Offset
+        JSlider offsetSlider = createSlider("Spectrum Line Offset", 50, 150, spectrumOffset);
+        offsetSlider.addChangeListener(e -> spectrumOffset = offsetSlider.getValue());
+
+        controlPanel.add(minSlider);
+        controlPanel.add(maxSlider);
+        controlPanel.add(offsetSlider);
+
+        // Add controls to the NORTH so they are never pushed off the bottom of the window
+        add(controlPanel, BorderLayout.NORTH);
+
+        // 3. Setup the custom drawing area
+        display = new ScopeDisplay();
+        // Scaled down from 1024x600 to fit better inside your main GUI bounds
+        display.setPreferredSize(new Dimension(580, 400)); 
+        add(display, BorderLayout.CENTER);
     }
 
-    private int getColorMap(double db) {
-        double minDb = -100.0;
-        double maxDb = -10.0; 
+    /**
+     * Helper method to generate nicely formatted JSliders.
+     */
+    private JSlider createSlider(String title, int min, int max, int value) {
+        JSlider slider = new JSlider(JSlider.HORIZONTAL, min, max, value);
+        slider.setBorder(BorderFactory.createTitledBorder(title));
+        slider.setMajorTickSpacing(20);
+        slider.setMinorTickSpacing(10);
+        slider.setPaintTicks(true);
+        slider.setPaintLabels(true);
+        return slider;
+    }
+
+    /**
+     * Inner class responsible exclusively for rendering the scope visuals.
+     */
+    private class ScopeDisplay extends JPanel {
         
-        double normalized = (db - minDb) / (maxDb - minDb);
+        public ScopeDisplay() {
+            setBackground(Color.BLACK);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            
+            int width = getWidth();
+            int height = getHeight();
+            int halfHeight = height / 2;
+
+            // 1. DRAW WATERFALL (Bottom Half)
+            g.drawImage(waterfallImage, 0, halfHeight, width, halfHeight, null);
+
+            // 2. DRAW SPECTRUM (Top Half)
+            g.setColor(Color.GREEN);
+            
+            for (int i = 0; i < FFT_SIZE - 1; i++) {
+                int x1 = (int) ((i / (double) FFT_SIZE) * width);
+                int x2 = (int) (((i + 1) / (double) FFT_SIZE) * width);
+                
+                // Incorporate dynamic offset from slider
+                int y1 = halfHeight - (int) ((magnitudesDb[i] + spectrumOffset) * 3);
+                int y2 = halfHeight - (int) ((magnitudesDb[i + 1] + spectrumOffset) * 3);
+                
+                y1 = Math.max(0, Math.min(halfHeight, y1));
+                y2 = Math.max(0, Math.min(halfHeight, y2));
+
+                g.drawLine(x1, y1, x2, y2);
+            }
+        }
+    }
+
+    /**
+     * Maps a decibel (dB) value to a color using dynamic ranges set by the sliders.
+     */
+    private int getColorMap(double db) {
+        // Grab current snapshot of volatile variables to prevent mid-calc shifting
+        double currentMin = minDbLevel;
+        double currentMax = maxDbLevel;
+        
+        // Safety check to prevent divide-by-zero if sliders overlap
+        if (currentMin >= currentMax) currentMax = currentMin + 1; 
+
+        double normalized = (db - currentMin) / (currentMax - currentMin);
         normalized = Math.max(0.0, Math.min(1.0, normalized)); 
         
         float hue = (float) (0.66 - (normalized * 0.66));
         return Color.HSBtoRGB(hue, 1.0f, 1.0f);
-    }
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        
-        int width = getWidth();
-        int height = getHeight();
-        int halfHeight = height / 2;
-
-        // 1. DRAW WATERFALL (Bottom Half)
-        g.drawImage(waterfallImage, 0, halfHeight, width, halfHeight, null);
-
-        // 2. DRAW SPECTRUM (Top Half)
-        g.setColor(Color.GREEN);
-        for (int i = 0; i < FFT_SIZE - 1; i++) {
-            int x1 = (int) ((i / (double) FFT_SIZE) * width);
-            int x2 = (int) (((i + 1) / (double) FFT_SIZE) * width);
-            
-            int y1 = halfHeight - (int) ((magnitudesDb[i] + 100) * 3);
-            int y2 = halfHeight - (int) ((magnitudesDb[i + 1] + 100) * 3);
-            
-            y1 = Math.max(0, Math.min(halfHeight, y1));
-            y2 = Math.max(0, Math.min(halfHeight, y2));
-
-            g.drawLine(x1, y1, x2, y2);
-        }
     }
 
     public void startCapture() {
@@ -84,16 +160,14 @@ public class QMXBandscope extends JPanel {
             System.out.println("Listening to QMX...");
 
             while (true) {
-                // Robust Audio Read: Ensure we get exactly the bytes we asked for
                 int totalBytesRead = 0;
                 while (totalBytesRead < buffer.length) {
                     int bytesRead = line.read(buffer, totalBytesRead, buffer.length - totalBytesRead);
-                    if (bytesRead == -1) break;
+                    if (bytesRead == -1) break; 
                     totalBytesRead += bytesRead;
                 }
                 
                 if (totalBytesRead == buffer.length) {
-                    
                     for (int i = 0, j = 0; i < buffer.length; i += 4, j++) {
                         short left  = (short) ((buffer[i] & 0xFF) | (buffer[i+1] << 8));
                         short right = (short) ((buffer[i+2] & 0xFF) | (buffer[i+3] << 8));
@@ -104,8 +178,6 @@ public class QMXBandscope extends JPanel {
 
                     fft.complexForward(complexData);
 
-                    // --- FAST WATERFALL SHIFT ---
-                    // Shifts all pixels down by one row (FFT_SIZE) instantly. 100% OS-independent.
                     System.arraycopy(waterfallPixels, 0, waterfallPixels, FFT_SIZE, waterfallPixels.length - FFT_SIZE);
 
                     for (int i = 0; i < FFT_SIZE; i++) {
@@ -116,29 +188,16 @@ public class QMXBandscope extends JPanel {
                         double magDb = 20 * Math.log10(mag + 1e-10); 
                         
                         magnitudesDb[i] = magDb;
-                        
-                        // Set the new color directly into the top row of our pixel array
                         waterfallPixels[i] = getColorMap(magDb); 
                     }
 
-                    SwingUtilities.invokeLater(this::repaint);
+                    // Target the display sub-panel for repainting, not the whole frame
+                    SwingUtilities.invokeLater(display::repaint);
                 }
             }
         } catch (LineUnavailableException e) {
+            System.err.println("Audio input line unavailable. Is another program using the soundcard?");
             e.printStackTrace();
         }
-    }
-
-    public static void __main(String[] args) {
-        JFrame frame = new JFrame("QMX IQ Bandscope & Waterfall");
-        QMXBandscope scope = new QMXBandscope();
-        
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.add(scope);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-
-        new Thread(scope::startCapture).start();
     }
 }

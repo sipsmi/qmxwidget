@@ -1,7 +1,7 @@
 /*
- *  G0FOZ    code (at) bockhampton.info
- *  Copyleft
- *  No responsibility will be taken for impact of this code on your system!
+ * G0FOZ    code (at) bockhampton.info
+ * Copyleft
+ * No responsibility will be taken for impact of this code on your system!
  */
 
 import java.awt.BasicStroke;
@@ -34,9 +34,6 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-//import javax.swing.plaf.basic.BasicIconFactory;
-//import javax.swing.plaf.metal.MetalIconFactory;
-//import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -47,23 +44,14 @@ import org.jfree.data.Range;
 import org.jfree.data.general.DefaultValueDataset;
 import org.jfree.data.general.ValueDataset;
 
-//import com.fazecast.jSerialComm.SerialPort;
-//import com.fazecast.jSerialComm.SerialPortDataListener;
-//import com.fazecast.jSerialComm.SerialPortEvent;
-
 import javax.swing.BoxLayout;
 import java.awt.Font;
 import javax.swing.SwingConstants;
-//import java.awt.Button;
 import javax.swing.ImageIcon;
 import java.awt.FlowLayout;
-//import java.beans.PropertyChangeListener;
-//import java.beans.PropertyChangeEvent;
-//import java.awt.GridLayout;
-//import javax.swing.SpringLayout;
 
 /**
- * 
+ * GUI Controller
  */
 public class GUI {
 	// mS for each timer fired off
@@ -73,14 +61,13 @@ public class GUI {
 	private static int tickLimit = 10;
 	
 	private JFrame frmGfozIc;
-	private static XmlRpcQmx qmx;// = new XmlRPCIC7000();
-	private static MainClass mc2;// = new MainClass();
+	private static XmlRpcQmx qmx;
+	private static MainClass mc2;
 	private static QSerialPort serialPort;
 	private static RigctlClient rigctl;
 	private int sig = 0;
 	private JTextField lcdText;
-	// Added CAT commands SA (AGC meter), SM (S meter), PC (Power meter), SW (SWR
-	// meter)
+	// Added CAT commands SA (AGC meter), SM (S meter), PC (Power meter), SW (SWR meter)
 	private int agc, pc, sw = 0;
 	private int oldVal1 = 0;
 	private JTextField txtVfoa;
@@ -115,7 +102,6 @@ public class GUI {
 	/**
 	 * Launch the application.
 	 */
-
 	public static void xmain(String[] args, XmlRpcQmx ic7000, MainClass mc, QSerialPort sPort) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -136,12 +122,17 @@ public class GUI {
 	 * Create the application.
 	 */
 	public GUI(XmlRpcQmx ic7000, MainClass mc, QSerialPort sPort) {
-		initialize();
 		qmx = ic7000;
 		mc2 = mc;
 		serialPort = sPort;
-		cwBuffer = new CircularStringBuffer(100);
-		cwBuffer.add("                                                                           ");
+		
+		// Guard logic that relies on runtime objects to prevent WB crashes
+		if (!java.beans.Beans.isDesignTime()) {
+			cwBuffer = new CircularStringBuffer(100);
+			cwBuffer.add("                                                                                ");
+		}
+		
+		initialize();
 	}
 
 	/**
@@ -150,7 +141,7 @@ public class GUI {
 	private void initialize() {
 		frmGfozIc = new JFrame();
 		frmGfozIc.setTitle("G0FOZ - QMX Controller");
-		frmGfozIc.setBounds(0, 0, 750, 850);
+		frmGfozIc.setBounds(0, 0, 750, 950);
 		frmGfozIc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmGfozIc.getContentPane().setLayout(null);
 
@@ -183,10 +174,12 @@ public class GUI {
 		spinnerMode.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				serialPort.sendCatStringmain("MD" + mc2.setModeInt((String) spinnerMode.getValue()));
+				if (!java.beans.Beans.isDesignTime() && serialPort != null && mc2 != null) {
+					serialPort.sendCatStringmain("MD" + mc2.setModeInt((String) spinnerMode.getValue()));
+				}
 			}
-
 		});
+		
 		FlowLayout fl_panel = new FlowLayout(FlowLayout.LEFT, 5, 5);
 		panel.setLayout(fl_panel);
 
@@ -220,8 +213,10 @@ public class GUI {
 		btnSendCq.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				serialPort.sendCatStringmain("KY CQ CQ CQ DE " + mc2.getMyCall() + " " + mc2.getMyCall() + " PSE K");
-				System.out.println("Send M1");
+				if(!java.beans.Beans.isDesignTime()) {
+					serialPort.sendCatStringmain("KY CQ CQ CQ DE " + mc2.getMyCall() + " " + mc2.getMyCall() + " PSE K");
+					System.out.println("Send M1");
+				}
 			}
 		});
 
@@ -244,21 +239,18 @@ public class GUI {
 
 		wpm = new JSlider();
 		wpm.addChangeListener(new ChangeListener() {
-
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				lock = true;
-				// JSlider Temp = (JSlider) e.getSource();
 				if (!wpm.getValueIsAdjusting()) {
 					int value = wpm.getValue();
-					if (qmx != null) {
+					if (qmx != null && !java.beans.Beans.isDesignTime()) {
 						serialPort.sendCatStringmain("KS" + value);
 						qmx.dispDebug("WPM" + value);
 					}
 					lock = false;
 				}
 			}
-
 		});
 
 		JButton buttonVfoB = new JButton("VFO B");
@@ -285,10 +277,12 @@ public class GUI {
 			@Override
 			public void itemStateChanged(ItemEvent ev) {
 				lock = true;
-				if (ev.getStateChange() == ItemEvent.SELECTED) {
-					System.out.println("PTT on" + serialPort.sendCatStringmain("TQ1"));
-				} else if (ev.getStateChange() == ItemEvent.DESELECTED) {
-					System.out.println("PTT off" + serialPort.sendCatStringmain("TQ0"));
+				if(!java.beans.Beans.isDesignTime()) {
+					if (ev.getStateChange() == ItemEvent.SELECTED) {
+						System.out.println("PTT on" + serialPort.sendCatStringmain("TQ1"));
+					} else if (ev.getStateChange() == ItemEvent.DESELECTED) {
+						System.out.println("PTT off" + serialPort.sendCatStringmain("TQ0"));
+					}
 				}
 				lock = false;
 			}
@@ -323,7 +317,9 @@ public class GUI {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				lock = true;
-				setFrequency(freqA, freqStep);
+				if (!java.beans.Beans.isDesignTime()) {
+					setFrequency(freqA, freqStep);
+				}
 				lock = false;
 			}
 		});
@@ -343,21 +339,23 @@ public class GUI {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				lock = true;
-				setFrequency(freqA, -freqStep);
+				if (!java.beans.Beans.isDesignTime()) {
+					setFrequency(freqA, -freqStep);
+				}
 				lock = false;
 			}
 		});
-		;
 
 		// set frequency step
 		JSpinner spinnerFreqStep = new JSpinner();
 		spinnerFreqStep.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				freqStep = mc2.getStepString((String) spinnerFreqStep.getValue());
-				System.out.println("Freq step now " + freqStep);
+				if (!java.beans.Beans.isDesignTime() && mc2 != null) {
+					freqStep = mc2.getStepString((String) spinnerFreqStep.getValue());
+					System.out.println("Freq step now " + freqStep);
+				}
 			}
-
 		});
 		spinnerFreqStep.setModel(
 				new SpinnerListModel(new String[] { " 100 Hz", " 500 Hz", " 1 KHz", "10 KHz", "100 KHz", " 1 MHz" }));
@@ -394,7 +392,6 @@ public class GUI {
 		JLabel label_7 = new JLabel("");
 		panel.add(label_7);
 
-		// DefaultValueDataset dataset = new DefaultValueDataset(10D);
 		JFreeChart sdial = createChart(dataset);
 		plot = (MeterPlot) sdial.getPlot();
 		GridBagConstraints gbc_dial = new GridBagConstraints();
@@ -403,20 +400,9 @@ public class GUI {
 		gbc_dial.gridx = 0;
 		gbc_dial.gridy = 0;
 
-		//ChartPanel chartpanel = new ChartPanel(sdial);
-		//chartpanel.setBounds(0, 0, 250, 100);
-		//chartpanel.setFillZoomRectangle(false);
-		//chartpanel.setEnforceFileExtensions(false);
-		// chartpanel.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null,
-		// null));
-		//chartpanel.setMaximumDrawWidth(300);
-		//chartpanel.setMaximumDrawHeight(100);
-		//chartpanel.setLayout(new BoxLayout(chartpanel, BoxLayout.X_AXIS));
-				// temp 
 		smeter = new SMeter();
 		smeter.setLayout(null);
 		smeter.setBounds(0, 0, 300, 200);
-		//smeter.setSize(300, 100);
 		smeter.setLayout(new BoxLayout(smeter, BoxLayout.X_AXIS));
 
 		ChartPanel swrchartpanel = new ChartPanel(swrdial);
@@ -436,29 +422,22 @@ public class GUI {
 		pchartpanel.setLayout(null);
 		meter_panel.setLayout(null);
 		
-		
-
-		//meter_panel.add(chartpanel);
 		meter_panel.add(smeter);
-		//smeter.setVisible(true);
 		meter_panel.add(swrchartpanel);
 		meter_panel.add(pchartpanel);
 		
-		
-		
 		//bandscope
-       QMXBandscope scope = new QMXBandscope();
-            panel.add(scope);
-            new Thread(scope::startCapture).start();
-
-		// set up the timer
-		//
-		// split into regular and not regular
-
+		// Fixed invisible characters breaking the compiler here
+		QMXBandscope scope = new QMXBandscope();
+		panel.add(scope);
+		
+		// Set up the timer
 		Timer timer = new Timer(timerInterval, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent evt) {
-				// sort any messages waiting
+				// Prevent timer execution during GUI design mode
+				if (java.beans.Beans.isDesignTime()) return; 
+
 				processMessageQueue();
 
 				// section for fast queries
@@ -467,10 +446,6 @@ public class GUI {
 				serialPort.sendCatStringmain("PC");
 				serialPort.sendCatStringmain("SW");
 
-				// agc = mc2.getIntFromString(serialPort.sendCatStringmain("SA"));
-				// int tpc = mc2.getIntFromString(serialPort.sendCatStringmain("PC"));
-				// int tsw = mc2.getIntFromString(serialPort.sendCatStringmain("SW"));
-				// only go to zero if been there for a hilen (QSK PTT(
 				if (tpc < 10) {
 					pwrZCount++;
 					if (pwrZCount > 30) {
@@ -482,6 +457,7 @@ public class GUI {
 					pc = tpc;
 					sw = tsw;
 				}
+				
 				// update GUI only if things have changed
 				if (oldVal1 != (pc + sw)) {
 					qmx.dispDebug("CatResp RX Sig: " + sig + "dB" + " agc/pc/sw " + agc + "/" + pc + "/" + sw);
@@ -492,15 +468,12 @@ public class GUI {
 					oldVal1 = (pc + sw);
 				}
 
-				if (tickCount > tickLimit) // only so often do these 
-				{
+				if (tickCount > tickLimit) {
 					tickCount = 0; // reset
-					//serialPort.sendCatStringmain("IF");
 					serialPort.sendCatStringmain("TQ");
 					serialPort.sendCatStringmain("MD");
 					serialPort.sendCatStringmain("KS");
 					serialPort.sendCatStringmain("LC");
-					// display the VFO contents
 					serialPort.sendCatStringmain("FA");
 					serialPort.sendCatStringmain("FB");
 					serialPort.sendCatStringmain("TB");
@@ -514,7 +487,12 @@ public class GUI {
 		});
 		timer.setRepeats(true);
 		smeter.setValue(5.01);
-		timer.start();
+		
+		// CRITICAL WINDOWBUILDER FIX: Guard Threads and Timers so they don't fire while editing the UI
+		if (!java.beans.Beans.isDesignTime()) {
+			new Thread(scope::startCapture).start();
+			timer.start();
+		}
 	}
 
 	/**
@@ -526,10 +504,8 @@ public class GUI {
 		serialPort.sendCatStringmain(catString);
 		catString = "FB" + Integer.toString(fNow + offset);
 		serialPort.sendCatStringmain(catString);
-
 	}
 
-	// define signal meter
 	/**
 	 * @param dataset
 	 * @return
@@ -539,13 +515,10 @@ public class GUI {
 		plot.addInterval(new MeterInterval("All", new Range(0.0, 100.0)));
 		plot.addInterval(new MeterInterval("High", new Range(80.0, 100.0)));
 		plot.setDialOutlinePaint(Color.white);
-		// plot.addInterval(new MeterInterval("Low", new Range(0.00, 70.0), Color.RED,
-		// new BasicStroke(2.0f), null));
 		plot.setUnits("dB");
 		plot.setTickLabelsVisible(true);
 		plot.setDialShape(DialShape.CHORD);
 		plot.setValuePaint(Color.GRAY);
-		// plot.getIntervals().a
 		plot.setTickLabelsVisible(true);
 		plot.setRange(new Range(0, 100));
 		plot.setMeterAngle(180);
@@ -554,7 +527,6 @@ public class GUI {
 		return chart;
 	}
 
-	// define power meter
 	/**
 	 * @param dataset
 	 * @return
@@ -562,7 +534,6 @@ public class GUI {
 	private static JFreeChart createPwrChart(ValueDataset dataset) {
 		MeterPlot pplot = new MeterPlot(dataset);
 		pplot.addInterval(new MeterInterval("All", new Range(5.0, 6.0)));
-		// pplot.addInterval(new MeterInterval("High", new Range(4.0, 6.0)));
 		pplot.setDialOutlinePaint(Color.white);
 		pplot.addInterval(new MeterInterval("Low", new Range(1.00, 2.0), Color.RED, new BasicStroke(2.0f), null));
 		pplot.addInterval(new MeterInterval("Mid", new Range(3.0, 4.0), Color.GREEN, new BasicStroke(2.0f), null));
@@ -570,7 +541,6 @@ public class GUI {
 		pplot.setTickLabelsVisible(true);
 		pplot.setDialShape(DialShape.CHORD);
 		pplot.setValuePaint(Color.GRAY);
-		// plot.getIntervals().a
 		pplot.setTickLabelsVisible(true);
 		pplot.setRange(new Range(0, 6));
 		pplot.setMeterAngle(180);
@@ -579,15 +549,12 @@ public class GUI {
 		return chart;
 	}
 
-	// define swr meter
 	/**
 	 * @param dataset
 	 * @return
 	 */
 	private static JFreeChart createSwrChart(ValueDataset dataset) {
 		MeterPlot splot = new MeterPlot(dataset);
-		// splot.addInterval(new MeterInterval("All", new Range(5.0, 6.0)));
-		// pplot.addInterval(new MeterInterval("High", new Range(4.0, 6.0)));
 		splot.setDialOutlinePaint(Color.white);
 		splot.addInterval(new MeterInterval("Low", new Range(2.00, 3.0), Color.RED, new BasicStroke(2.0f), null));
 		splot.addInterval(new MeterInterval("Mid", new Range(1.0, 2.0), Color.GREEN, new BasicStroke(2.0f), null));
@@ -595,7 +562,6 @@ public class GUI {
 		splot.setTickLabelsVisible(true);
 		splot.setDialShape(DialShape.CHORD);
 		splot.setValuePaint(Color.GRAY);
-		// plot.getIntervals().a
 		splot.setTickLabelsVisible(true);
 		splot.setRange(new Range(1, 3));
 		splot.setMeterAngle(180);
@@ -604,54 +570,42 @@ public class GUI {
 		return chart;
 	}
 	
-	
-
-	
 	/**
 	 * Converts a dB signal to a linear scale of 0.0 to 15.0.
-	 * * @param dbValue    The input signal in dB.
-	 * @param minDb      The floor value (maps to 0.0). E.g., -100.0
-	 * @param maxDb      The ceiling value (maps to 15.0). E.g., 0.0
+	 * @param dbValue    The input signal in dB.
 	 * @return           A linear value between 0.0 and 15.0.
 	 */
 	public static float convertDbToLinearScale(int dbValue) {
-	    // 1. Clamp the input to ensure it stays within our defined range
-		final int  meterRng = 108;
-	    int clampedDb =  Math.min( meterRng, dbValue);
+		// 1. Clamp the input to ensure it stays within our defined range
+		final int meterRng = 108;
+		int clampedDb = Math.min(meterRng, dbValue);
 
-	    // 2. Convert dB to a standard linear power ratio: P = 10^(db/10)
-	    // However, for a simple 0-15 UI scale, we normalize the dB range first.
-	    float normalized = (float) ( (clampedDb+0.001)  / (meterRng+0.001));
+		// 2. Convert dB to a standard linear power ratio: P = 10^(db/10)
+		// However, for a simple 0-15 UI scale, we normalize the dB range first.
+		float normalized = (float) ((clampedDb + 0.001) / (meterRng + 0.001));
 
-	    // 3. Scale to the target range (15.0)
-	    float linearScale = (float) (normalized * 15.0);
+		// 3. Scale to the target range (15.0)
+		float linearScale = (float) (normalized * 15.0);
 
-	    return linearScale;
+		return linearScale;
 	}
 	
 	/**
-	 * 
-	 */
+	 * */
 	private void processMessageQueue() {
-		// process reponse queue here
-		// could do this in seperate function
 		while (serialPort.sizeResponse() > 0) {
 			responseString = serialPort.fetchAndRemoveResponse();
 			if (responseString == null || responseString.charAt(0) == '?' || responseString.length() < 2) {
-				// System.out.println("INvalid reponse received: "+responseString );
 				continue;
 			} else if (responseString.charAt(2) == ';') {
-				// System.out.println("Confirmation reponse received: "+responseString );
 				continue;
 			}
 			String sc = responseString.substring(0, 2);
-			// System.out.println("Process reponse(" + sc + "): " + responseString);
 			switch (sc) {
 			case "SM": // Signal Meter
 				sig = mc2.getIntFromString(responseString);
 				dataset.setValue(sig);
 				plot.setDataset(dataset);
-				
 				smeter.setValue(convertDbToLinearScale(sig));
 				break;
 			case "FA": // VFO A
@@ -674,22 +628,17 @@ public class GUI {
 			case "IF": // TS480 Information String
 				statusLabel.setText(responseString);
 				break;
-			// agc = mc2.getIntFromString(serialPort.sendCatStringmain("SA"));
-			// int tpc = mc2.getIntFromString(serialPort.sendCatStringmain("PC"));
-			// int tsw = mc2.getIntFromString(serialPort.sendCatStringmain("SW"));
 			case "TQ": // Transmit states
-				// TX state
 				isTx = (mc2.getIntFromString(responseString) > 0) ? true : false;
 				chckbxTx.setSelected(isTx);
 				break;
-			case "MD": // currentn mode
+			case "MD": // current mode
 				thisMode = mc2.getIntFromString(responseString);
 				spinnerMode.setValue(mc2.getModeString(thisMode));
 				break;
 			case "TB": // cw receiver buffer
-				cwBuffer.add(  mc2.getCWTextFromTB(responseString) );
-				statusLabel.setText( cwBuffer.toString() );
-				
+				cwBuffer.add(mc2.getCWTextFromTB(responseString));
+				statusLabel.setText(cwBuffer.toString());
 				break;
 			case "KS": // current WPM
 				if (!lock) {
@@ -697,12 +646,9 @@ public class GUI {
 					wpm.setValue(thisWpm);
 				}
 				break;
-
 			default:
 				System.out.println("Process reponse not supported (" + sc + "): " + responseString);
 			}
-
 		}
 	}
-
 }
