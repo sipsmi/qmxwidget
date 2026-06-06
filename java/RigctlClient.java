@@ -11,12 +11,7 @@
  * efficiently within its limited scope but lacks robustness in error handling and resource management. 
  */
 
-/*
- * Key Improvement Opportunities:
- * - Implement resource cleanup mechanisms to close socket and streams properly.
- * - Enhance error handling to provide more detailed feedback and avoid silent failures.
- * - Validate input parameters and handle edge cases for frequency more strictly.
- */
+
 
 import java.io.BufferedReader;  // Imports for buffered I/O operations
 import java.io.BufferedWriter;  // Used to write character data to an output stream

@@ -8,16 +8,8 @@
  * The XmlRpcQmx class facilitates communication with an XML-RPC service, providing methods to send and receive commands.
  */
 
-/*
- * Key Improvement Opportunities:
- * - Simplify the logic with early returns to enhance readability.
- * - Improve error handling to capture more specific issues and avoid silent failures.
- * - Ensure that input validations and edge cases are properly managed.
- * - Streamline the use of the catCodeMap by making it immutable.
- * - Consider using enums for command strings to remove hardcoded values for better maintainability.
- */
 
-import java.net.URL;
+import java.net.URI;
 import java.util.Collections; // For creating unmodifiable collections
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +54,13 @@ public class XmlRpcQmx {
         try {
             // Configure the XML-RPC client with server details
             XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-            config.setServerURL(new URL("http://" + getServer() + ":" + getServerPort())); // Setting server URL
+            
+
+
+            config.setServerURL(URI.create("http://" + getServer() + ":" + getServerPort()).toURL());
+
+
+
 
             // Create the client instance and assign configuration
             client = new XmlRpcClient();

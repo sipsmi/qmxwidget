@@ -1,3 +1,9 @@
+/*
+ * G0FOZ    code (at) bockhampton.info
+ * Copyleft
+ * No responsibility will be taken for impact of this code on your system!
+ */
+
 import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +31,7 @@ public class QMXBandscope extends JPanel {
     // --- Dynamic Level Controls (Volatile for Thread Safety) ---
     private volatile double minDbLevel = -100.0;
     private volatile double maxDbLevel = -10.0;
-    private volatile int spectrumOffset = 100;
+    private volatile int spectrumOffset = 50;
 
     // --- UI Components ---
     private ScopeDisplay display;
@@ -44,15 +50,15 @@ public class QMXBandscope extends JPanel {
         controlPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Slider: Waterfall Noise Floor (Min dB)
-        JSlider minSlider = createSlider("Waterfall Min (Noise Floor)", -150, -50, (int)minDbLevel);
+        JSlider minSlider = createSlider("Waterfall Min (Noise Floor)", -100, -30, (int)minDbLevel);
         minSlider.addChangeListener(e -> minDbLevel = minSlider.getValue());
         
         // Slider: Waterfall Peak (Max dB)
-        JSlider maxSlider = createSlider("Waterfall Max (Peak)", -80, 20, (int)maxDbLevel);
+        JSlider maxSlider = createSlider("Waterfall Max (Peak)", -60, 40, (int)maxDbLevel);
         maxSlider.addChangeListener(e -> maxDbLevel = maxSlider.getValue());
 
         // Slider: Spectrum Line Graph Y-Offset
-        JSlider offsetSlider = createSlider("Spectrum Line Offset", 50, 150, spectrumOffset);
+        JSlider offsetSlider = createSlider("Spectrum Line Offset", 40, 100, spectrumOffset);
         offsetSlider.addChangeListener(e -> spectrumOffset = offsetSlider.getValue());
 
         controlPanel.add(minSlider);
@@ -87,7 +93,9 @@ public class QMXBandscope extends JPanel {
      */
     private class ScopeDisplay extends JPanel {
         
-        public ScopeDisplay() {
+        private static final long serialVersionUID = -5904630221697349376L;
+
+		public ScopeDisplay() {
             setBackground(Color.BLACK);
         }
 

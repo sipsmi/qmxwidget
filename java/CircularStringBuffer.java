@@ -1,17 +1,15 @@
-/* 
+/*
+ * G0FOZ    code (at) bockhampton.info
+ * Copyleft
+ * No responsibility will be taken for impact of this code on your system!
+ *
  * This class implements a circular string buffer that stores characters in a fixed-size 
  * array. It allows for adding new strings while maintaining a maximum capacity, effectively 
  * overwriting the oldest data when necessary. The class provides functionality to clear the 
  * buffer, obtain its current contents as a string, and check its size and capacity.
  */
 
-/* 
- * Key improvement opportunities: 
- * 1. The method to add a string could use more comprehensive error handling for input validation 
- *    beyond null or empty checks. 
- * 2. The current implementation might be susceptible to buffer overflow if not managed properly.
- * 3. There are no checks for concurrent modifications to the buffer, which could lead to inconsistent states.
- */
+
 
 public class CircularStringBuffer {
     private final char[] buffer;  // The underlying array to store characters.

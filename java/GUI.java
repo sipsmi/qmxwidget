@@ -426,10 +426,17 @@ public class GUI {
 		meter_panel.add(swrchartpanel);
 		meter_panel.add(pchartpanel);
 		
+		
+		if (!java.beans.Beans.isDesignTime()) {
+		    // Only build and add the complex panels when actually running the app
+
+
+
+		}
+		
 		//bandscope
 		// Fixed invisible characters breaking the compiler here
-		QMXBandscope scope = new QMXBandscope();
-		panel.add(scope);
+
 		
 		// Set up the timer
 		Timer timer = new Timer(timerInterval, new ActionListener() {
@@ -490,6 +497,9 @@ public class GUI {
 		
 		// CRITICAL WINDOWBUILDER FIX: Guard Threads and Timers so they don't fire while editing the UI
 		if (!java.beans.Beans.isDesignTime()) {
+			
+		    QMXBandscope scope = new QMXBandscope();
+		    panel.add(scope);
 			new Thread(scope::startCapture).start();
 			timer.start();
 		}

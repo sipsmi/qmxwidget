@@ -1,5 +1,7 @@
-
-/**
+/*
+ * G0FOZ    code (at) bockhampton.info
+ * Copyleft
+ * No responsibility will be taken for impact of this code on your system!
  * Represents the CAT commands for QMX-series transceivers.
  * Commands never contain a carriage return or linefeed and are terminated by a semicolon.
  *  1. Generate the command using our Enum

@@ -1,12 +1,20 @@
+
+/*
+ * G0FOZ    code (at) bockhampton.info
+ * Copyleft
+ * No responsibility will be taken for impact of this code on your system!
+ */
+
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Line2D;
 
 public class SMeter extends JPanel {
 
-    // The current value of the meter (0.0 to 15.0)
+    private static final long serialVersionUID = -420728911403960772L;
+	// The current value of the meter (0.0 to 15.0)
     // 0-9 represents S0 to S9.
     // 10-15 represents +10dB to +60dB (1 unit = 10dB for simplicity here)
     private double value = 0.0;
