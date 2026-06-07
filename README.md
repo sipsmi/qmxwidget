@@ -19,10 +19,10 @@ java -jar qmx.jar   config.json
 
 See the release assets for these files.  *do* edit the JSON configuration file before you run it.
 
-Note:  If you want to use the band scope then download sdr++ and have this running first and ensure that:
-(1) SDR++ is running with sound card ( audio ) input connected to the QMX presented sound card.
-(2) SDR++ RigCTL server is running and the address/port match that in the configuration file.
-see [SDR++ manual](https://www.sdrpp.org/manual.pdf)
+~~Note:  If you want to use the band scope then download sdr++ and have this running first and ensure that:~~\
+~~(1) SDR++ is running with sound card ( audio ) input connected to the QMX presented sound card.~~\
+~~(2) SDR++ RigCTL server is running and the address/port match that in the configuration file.~~\
+~~see~~ [~~SDR++ manual~~](https://www.sdrpp.org/manual.pdf)
 
 ## Configuration
 
@@ -39,74 +39,10 @@ Parameters are input as a configuration file in JSON format:
 
 Configuration parameters
 
-| Parameter      | Example value | Description                                                                       |
-| :------------- | :------------ | :-------------------------------------------------------------------------------- |
-| Callsign       | G0FOZ         | Your callsign - will be used for the CQ button and other macros.                  |
-| rigctldAddress | localhost     | SDR bandscope display frequency data                                              |
-| rigctldPort    | 4532          | Port for frequency control of bandscope                                           |
-| qmxDevice      | COM3          | The USB/Serial interface, will be COMx on windows, various /dev/.... on Linux/MAX | 
-A
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-B
-A
-A
-A
-A
-A
-A
-A
-A
-A
-A
-A
-A
-A
-A
-A
-A
-A
-A
-A
-A
-A
-| qmxDevice      | COM3          | The USB/Serial interface, will be COMx on windows, various /dev/.... on Linux/MAX | 
+| Parameter      | Example value | Description                                                      |
+| :------------- | :------------ | :--------------------------------------------------------------- |
+| Callsign       | G0FOZ         | Your callsign - will be used for the CQ button and other macros. |
+| rigctldAddress | localhost     | SDR bandscope display frequency data                             |
+| rigctldPort    | 4532          | Port for frequency control of bandscope                          |
+| qmxDevice      | COM3          | The USB/Serial interface, will be COMx on windows                |
+| qmxDevice      | /dev/QMX01    | The USB/Serial interface, on Linux/MAC                           | 
